@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Questionnaire sur les groupes de parole</h1>
+    <p>Merci de compléter ce questionnaire, cela ne vous prendra qu’environ 15 minutes et sera très utile à la recherche.</p>
+    <p>Pour les questions à choix multiples, veuillez cochez le ou les case(s) qui se rapprochent le plus de ce que vous pensez. Pour les questions ouvertes, n’hésitez pas à développer votre réponse et donner des exemples. Il n’y a pas de bonnes ou de mauvaises réponses, c’est votre avis qui nous intéresse.</p>
+    <p>Encore merci pour votre participation</p>
+    <p>Si vous souhaitez plus d’informations sur la recherche en cours, cliquez <a href="https://www.groupesdeparole.be">ici</a>.</p>
+    {{ form(form) }}
+{% endblock %}
