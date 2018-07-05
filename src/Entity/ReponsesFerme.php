@@ -22,6 +22,14 @@ class ReponsesFerme extends Reponses
      */
     private $multiple;
 
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $texte;
+
+
+
     public function __construct()
     {
         $this->questions = new ArrayCollection();
@@ -67,6 +75,19 @@ class ReponsesFerme extends Reponses
                 $question->setReponse(null);
             }
         }
+
+        return $this;
+    }
+
+
+    public function getTexte(): ?string
+    {
+        return $this->texte;
+    }
+
+    public function setTexte(string $texte): self
+    {
+        $this->texte = $texte;
 
         return $this;
     }

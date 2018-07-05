@@ -5,9 +5,13 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\QuestionRepository")
+ * @UniqueEntity(fields={"ordre","thematique"},message="Attention une question ayant cette ordre est déjà présent dans cette catégorie")-
+ * @UniqueEntity(fields={"ordre","thematique"},message="Attention une question ayant cette ordre est déjà présent dans cette catégorie")-addE
  */
 class Question
 {
@@ -20,23 +24,27 @@ class Question
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotNull()
+     * @Assert\NotBlank()
      */
     private $question;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="integer", nullable=true)     *
+     * @Assert\Type("int",message="Ce nombre doit-être entier")
      */
     private $ordre;
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Reponses", mappedBy="question")
+     * @ORM\OneToMany(targetEntity="Reponses", mappedBy="question", cascade={"persist"})
      */
     private $reponses;
 
     /**
      * @var Thematique
      * @ORM\ManyToOne(targetEntity="Thematique", inversedBy="questions")
+     * @Assert\Valid()
      */
     private $thematique;
 
@@ -45,6 +53,11 @@ class Question
      * @ORM\OneToMany(targetEntity="QuestionPrerequis", mappedBy="question")
      */
     private $reponsePreRequise;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $aide;
 
 
     public function __construct()
@@ -156,6 +169,18 @@ class Question
                 $reponsePreRequise->setQuestion(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAide(): ?string
+    {
+        return $this->aide;
+    }
+
+    public function setAide(?string $aide): self
+    {
+        $this->aide = $aide;
 
         return $this;
     }

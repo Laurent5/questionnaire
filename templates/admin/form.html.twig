@@ -1,0 +1,7 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block body %}
+    <h1>{% if h1 is defined %}{{ h1 }}{% else %}Formulaire{% endif %}</h1>
+    <br \>
+    <p>{{ form(form) }}</p>
+{% endblock %}

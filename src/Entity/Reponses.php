@@ -25,26 +25,10 @@ abstract class Reponses
      */
     private $question;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $texte;
 
     public function getId()
     {
         return $this->id;
-    }
-
-    public function getTexte(): ?string
-    {
-        return $this->texte;
-    }
-
-    public function setTexte(string $texte): self
-    {
-        $this->texte = $texte;
-
-        return $this;
     }
 
     public function getQuestion(): ?Question

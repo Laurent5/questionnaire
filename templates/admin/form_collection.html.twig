@@ -1,0 +1,19 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block body %}
+    <h1>{% if h1 is defined %}{{ h1 }}{% else %}Formulaire{% endif %}</h1>
+    <br \>
+    <p>
+        {{ form_start(form) }}
+        {{ form_row('thematique') }}
+        {{ form_row('ordre') }}
+        {{ form_row('question') }}
+        {{ form_row('aide') }}
+        {{ form_row('choix') }}
+        {{ form_label(form.choix_possibles) }}
+        {% for reponse in form.choix_possibles %}
+            {{ form_row('reponse') }}
+        {% endfor %}
+        {{ form_end(form) }}
+    </p>
+{% endblock %}

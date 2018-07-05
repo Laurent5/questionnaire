@@ -5,9 +5,12 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ThematiqueRepository")
+ * @UniqueEntity("ordre", message="Il existe déjà une thématique avec ce numéro")
  */
 class Thematique
 {
@@ -28,6 +31,12 @@ class Thematique
      * @ORM\OneToMany(targetEntity="Question", mappedBy="thematique")
      */
     private $questions;
+
+    /**
+     * @ORM\Column(type="integer")
+     * @Assert\Type("int",message="Ce nombre doit-être entier")
+     */
+    private $ordre;
 
     public function __construct()
     {
@@ -78,6 +87,18 @@ class Thematique
                 $question->setThematique(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOrdre(): ?int
+    {
+        return $this->ordre;
+    }
+
+    public function setOrdre(int $ordre): self
+    {
+        $this->ordre = $ordre;
 
         return $this;
     }

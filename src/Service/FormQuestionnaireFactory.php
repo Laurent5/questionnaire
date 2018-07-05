@@ -136,7 +136,7 @@ class FormQuestionnaireFactory
                 $constraints = null;
                 /** @var ReponsesOuverte $reponse */
                 switch ($reponse->getType()->getType()){
-                    case 'INTEGER' :
+                    case 'Nombre entier' :
                         $formType = IntegerType::class;
                         $optionArray['constraints'] = array(
                             new NotBlank(),
@@ -151,7 +151,7 @@ class FormQuestionnaireFactory
                             ))
                         );
                         break;
-                    case 'TEXT' :
+                    case 'Texte' :
                         $formType = TextareaType::class;
                         $optionArray['constraints'] = array(
                             new NotBlank(),
