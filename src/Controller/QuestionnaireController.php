@@ -34,7 +34,7 @@ class QuestionnaireController extends Controller {
         }
 
         //ByPass
-        $thematique = $this->getDoctrine()->getRepository(Thematique::class)->find(3);
+        $thematique = $this->getDoctrine()->getRepository(Thematique::class)->findOneBy(array('ordre'=>'1'));
         //ByPass
 
         $form = $factory->getFormFor($thematique);

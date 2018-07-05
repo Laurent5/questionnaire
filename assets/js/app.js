@@ -6,6 +6,7 @@ require('bootstrap');
 require('bootstrap-sass');
 require('../js/onclick.js');
 require('../js/collection.js')
+require('../js/select.js')
 
 //css
 require('../css/global.scss')

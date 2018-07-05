@@ -10,13 +10,16 @@ namespace App\Controller;
 
 
 use App\Entity\Question;
+use App\Entity\ReponsesFerme;
 use App\Entity\Thematique;
 use App\Form\QuestionFermeeType;
 use App\Form\QuestionOuverteType;
+use App\Form\SousQuestionOuverteType;
 use App\Form\ThematiqueType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -106,6 +109,15 @@ class AdminController extends Controller
 
     /**
      * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @Route("/sous_question/ouverte/sans_filtre/add", name="admin_add_sqosf")
+     */
+    public function sousQuestionOuverteSansFiltre(Request $request){
+        return $this->questions($request, SousQuestionOuverteType::class);
+    }
+
+    /**
+     * @param Request $request
      * @param $type
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
@@ -120,17 +132,43 @@ class AdminController extends Controller
             /** @var Question $data */
             $data = $form->getData();
 
-            $manager = $this->getDoctrine()->getManager();
-            $manager->persist($data);
-            $manager->flush();
+            dump($data);
 
-            return $this->redirectToRoute("admin_home");
+            $manager = $this->getDoctrine()->getManager();
+            //$manager->persist($data);
+            //$manager->flush();
+
+            //return $this->redirectToRoute("admin_home");
         }
 
         return $this->render('admin\form.html.twig',array(
             'form'=> $form->createView(),
             'h1' => "Ajouter une question"
         ));
+    }
+
+    /**
+     * @param Request $request
+     * @param Question $question
+     * @return string|null
+     * @Route("/reponses/get/{question}", condition="request.isXmlHttpRequest()", requirements={"question"="\d+"})
+     */
+    public function getReponsesFermees(Request $request, Question $question){
+
+        if($question !== null){
+            $reponses = $question->getReponses();
+            foreach ($reponses as $reponse){
+                if(get_class($reponse) != ReponsesFerme::class){
+                    return new Response();
+                }
+            }
+            return new Response($this->renderView('admin/_select_options.html.twig',array(
+                'reponses' => $reponses
+            )));
+        }
+
+        return new Response();
+
     }
 
 }
