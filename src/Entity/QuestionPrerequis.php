@@ -20,14 +20,14 @@ class QuestionPrerequis
 
     /**
      * @var ReponsesFerme
-     * @ORM\ManyToOne(targetEntity="ReponsesFerme", inversedBy="questions")
+     * @ORM\ManyToOne(targetEntity="ReponsesFerme", inversedBy="questions", cascade={"persist"})
      */
     private $reponse;
 
     /**
      * @var Question
      *
-     * @ORM\ManyToOne(targetEntity="Question", inversedBy="reponsePreRequise")
+     * @ORM\ManyToOne(targetEntity="Question", inversedBy="reponsePreRequise", cascade={"persist"})
      */
     private $question;
 

@@ -59,34 +59,14 @@ class SousQuestionOuverteType extends AbstractType
                 'choice_label' => 'texte'
             ))
 
-
-            //->add('reponse',HiddenType::class)
-
-            ->add('question',QuestionOuverteType::class, array(
+            ->add('question',QuestionOuverteForSousQuestionType::class, array(
                 'label' => false,
                 'constraints' => array(new Valid())
             ))
 
-            ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))
+            ->addEventListener(FormEvents::POST_SUBMIT, array($this,'onPostSubmit'))
 
         ;
-
-    }
-
-    public function onPreSubmit(FormEvent $formEvent)
-    {
-        $data = $formEvent->getData();
-
-        if(array_key_exists('reponse_help', $data)){
-            /** @var ReponsesFerme|null $reponse */
-            $reponse = $this->manager->getRepository(ReponsesFerme::class)->find($data['reponse_help']);
-            if($reponse!==null){
-                dump($reponse);
-                $data['reponse'] = $reponse;
-            }
-        }
-
-        $formEvent->setData($data);
 
     }
 
@@ -95,5 +75,13 @@ class SousQuestionOuverteType extends AbstractType
         $resolver->setDefaults([
             'data_class' => QuestionPrerequis::class,
         ]);
+    }
+
+    public function onPostSubmit(FormEvent $formEvent){
+        /** @var QuestionPrerequis $data */
+        $data = $formEvent->getData();
+
+        $data->getQuestion()->setThematique($data->getReponse()->getQuestion()->getThematique());
+        $data->setOptionnel(false);
     }
 }

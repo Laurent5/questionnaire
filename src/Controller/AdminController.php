@@ -132,13 +132,11 @@ class AdminController extends Controller
             /** @var Question $data */
             $data = $form->getData();
 
-            dump($data);
-
             $manager = $this->getDoctrine()->getManager();
-            //$manager->persist($data);
-            //$manager->flush();
+            $manager->persist($data);
+            $manager->flush();
 
-            //return $this->redirectToRoute("admin_home");
+            return $this->redirectToRoute("admin_home");
         }
 
         return $this->render('admin\form.html.twig',array(
