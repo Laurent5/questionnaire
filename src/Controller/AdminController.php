@@ -36,7 +36,8 @@ class AdminController extends Controller
      */
     public function home(){
         return $this->render('admin\home.html.twig',array(
-            'thematiques' => $this->getDoctrine()->getRepository(Thematique::class)->findBy(array(),array('ordre'=>'ASC'))
+            'thematiques' => $this->getDoctrine()->getRepository(Thematique::class)->findBy(array(),array('ordre'=>'ASC')),
+            'questions' => $this->getDoctrine()->getRepository(Question::class)->findBy(array(),array('ordre'=>'ASC'))
         ));
     }
 

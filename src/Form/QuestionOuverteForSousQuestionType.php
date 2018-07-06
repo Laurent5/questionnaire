@@ -24,7 +24,6 @@ class QuestionOuverteForSousQuestionType extends QuestionOuverteType
 
         $builder
             ->remove('thematique')
-            ->remove('ordre')
         ;
     }
 

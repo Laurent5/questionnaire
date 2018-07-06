@@ -63,4 +63,29 @@
             </div>
         </div>
     </div>
+    <div class="col-sm-12">
+        <div class="thumbnail">
+            <div class="caption">
+                <h3>Les questions déjà encodées</h3>
+                <table class="table-responsive table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Ordre</th>
+                        <th>Question</th>
+                        <th>Thématique</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for question in questions %}
+                        <tr>
+                            <td>{{ question.ordre }}</td>
+                            <td>{{ question.question }}</td>
+                            <td>{{ question.thematique.nom }}</td>
+                       </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 {% endblock %}

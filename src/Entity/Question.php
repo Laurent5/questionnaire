@@ -10,8 +10,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\QuestionRepository")
- * @UniqueEntity(fields={"ordre","thematique"},message="Attention une question ayant cette ordre est déjà présent dans cette catégorie")-
- * @UniqueEntity(fields={"ordre","thematique"},message="Attention une question ayant cette ordre est déjà présent dans cette catégorie")-addE
+ * @UniqueEntity("thematique",message="Attention une question ayant cette ordre est déjà présent dans cette catégorie")
  */
 class Question
 {
