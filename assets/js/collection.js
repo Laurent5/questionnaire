@@ -1,4 +1,5 @@
 var $collectionHolder;
+var prefix;
 
 // setup an "add a tag" link
 var $addReponse = $('<a href="#" id="add_reponse"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Ajouter une réponse</a>');
@@ -26,8 +27,7 @@ function addForm($collectionHolder, $newLink) {
     // Display the form in the page in an li, before the "Add a tag" link li
     $newLink.before($(newForm));
 
-    console.log(index);
-    addFormDelete($('div#question_fermee_choix_possibles_' + index));
+    addFormDelete($('div#' + prefix + index));
 
 
 }
@@ -49,10 +49,11 @@ function addFormDelete($form) {
 
 jQuery(document).ready(function() {
     // Get the ul that holds the collection of tags
-    $collectionHolder = $('div#question_fermee_choix_possibles');
+    $collectionHolder = $("div[data-collection='data-collection']").first();
+    prefix = $collectionHolder.attr('id') + "_";
 
     // add a delete link to all of the existing tag form li elements
-    $collectionHolder.find("div[id^='question_fermee_choix_possibles_']").each(function() {
+    $collectionHolder.find("div[id^='" + prefix + "']").each(function() {
         addFormDelete($(this));
     });
 

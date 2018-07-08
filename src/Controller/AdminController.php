@@ -14,6 +14,7 @@ use App\Entity\ReponsesFerme;
 use App\Entity\Thematique;
 use App\Form\QuestionFermeeType;
 use App\Form\QuestionOuverteType;
+use App\Form\SousQuestionFermeType;
 use App\Form\SousQuestionOuverteType;
 use App\Form\ThematiqueType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -97,6 +98,15 @@ class AdminController extends Controller
      */
     public function questionOuverteSansFiltre(Request $request){
         return $this->questions($request, QuestionOuverteType::class);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @Route("/sous_question/fermee/sans_filtre/add", name="admin_add_sqfsf")
+     */
+    public function sousQuestionFermeeSansFiltre(Request $request){
+        return $this->questions($request, SousQuestionFermeType::class);
     }
 
     /**

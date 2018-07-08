@@ -32,6 +32,7 @@ class QuestionFermeeType extends QuestionAbstractType
             ))
             ->add('choix_possibles',CollectionType::class,array(
                 'label' => 'Réponses possibles',
+                'attr' => array('data-collection'=>true),
                 'mapped' => false,
                 'entry_type' => ReponseFermeeType::class,
                 'entry_options' => array('label'=>false),
