@@ -10,7 +10,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\QuestionRepository")
- * @UniqueEntity("thematique",message="Attention une question ayant cette ordre est déjà présent dans cette catégorie")
+ * @UniqueEntity("ordre",message="Attention une question ayant cette ordre (Référence unique)")
  */
 class Question
 {
@@ -54,7 +54,7 @@ class Question
     private $reponsePreRequise;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
     private $aide;
 
