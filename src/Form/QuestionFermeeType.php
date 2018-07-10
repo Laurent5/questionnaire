@@ -20,6 +20,8 @@ use Symfony\Component\Validator\Constraints\NotNull;
 
 class QuestionFermeeType extends QuestionAbstractType
 {
+    private $multiple = null;
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         parent::buildForm($builder,$options);
@@ -30,38 +32,38 @@ class QuestionFermeeType extends QuestionAbstractType
                 'mapped' => false,
                 'required' => false
             ))
-            ->add('choix_possibles',CollectionType::class,array(
+            ->add('reponses',CollectionType::class,array(
                 'label' => 'Réponses possibles',
                 'attr' => array('data-collection'=>true),
-                'mapped' => false,
                 'entry_type' => ReponseFermeeType::class,
                 'entry_options' => array('label'=>false),
                 'allow_add' => true,
                 'allow_delete' => true,
+                'by_reference' => false,
                 'constraints' => array(new NotBlank(), new NotNull())
             ))
-            ->add('reponses',HiddenType::class)
             ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))
+            ->addEventListener(FormEvents::POST_SUBMIT,array($this,'onPostSubmit'))
         ;
     }
 
     public function onPreSubmit(FormEvent $formEvent){
+        /** @var Question $data */
+        $data = $formEvent->getData();
+        $this->multiple = array_key_exists('multiple', $data);
+
+    }
+
+    public function onPostSubmit(FormEvent $formEvent){
+
+        /** @var Question $data */
         $data = $formEvent->getData();
 
-        $multiple = array_key_exists('multiple',$data);
-        $reponses = new ArrayCollection();
-
-        if(array_key_exists('choix_possibles',$data)) {
-            foreach ($data['choix_possibles'] as $choix) {
-                $reponse = new ReponsesFerme();
-                $reponse->setMultiple($multiple);
-                $reponse->setTexte($choix['texte']);
-                $reponses->add($reponse);
-            }
+        /** @var ReponsesFerme $reponses */
+        foreach ($data->getReponses() as $reponses){
+            $reponses->setMultiple($this->multiple);
         }
 
-        $data['reponses'] = $reponses;
-        $formEvent->setData($data);
     }
 
 }

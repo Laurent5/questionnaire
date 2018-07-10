@@ -9,6 +9,7 @@ use App\Entity\Type;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -29,13 +30,18 @@ class QuestionOuverteType extends QuestionAbstractType
                 'label' => 'De quelle type doit-être la réponse ?',
                 'choice_label' => 'type'
             ))
-            ->add('reponses',HiddenType::class)
+            ->add('reponses',HiddenType::class, array(
+                'data' => null,
+
+            ))
             ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))
+            ->addEventListener(FormEvents::POST_SET_DATA, array($this,'onPostSetData'))
         ;
     }
 
     public function onPreSubmit(FormEvent $formEvent){
         $data = $formEvent->getData();
+        $reponse = null;
 
         $reponse = new ReponsesOuverte();
         $reponse->setType($this->manager->getRepository(Type::class)->find($data["reponses_type"]));
@@ -46,6 +52,21 @@ class QuestionOuverteType extends QuestionAbstractType
 
         $formEvent->setData($data);
 
+    }
+
+    public function onPostSetData(FormEvent $formEvent){
+        /** @var Question|null $data */
+        $data = $formEvent->getData();
+
+        if($data !== null){
+            /** @var ReponsesOuverte $reponse */
+            $reponse = $data->getReponses()->first();
+            $tab = $formEvent->getData();
+
+            $this->setDataAt($formEvent->getForm(), 'reponses_type', 'data', $reponse->getType());
+
+
+        }
     }
 
 }

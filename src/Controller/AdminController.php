@@ -11,6 +11,7 @@ namespace App\Controller;
 
 use App\Entity\Question;
 use App\Entity\ReponsesFerme;
+use App\Entity\ReponsesOuverte;
 use App\Entity\Thematique;
 use App\Form\QuestionFermeeType;
 use App\Form\QuestionOuverteType;
@@ -18,6 +19,7 @@ use App\Form\SousQuestionFermeType;
 use App\Form\SousQuestionOuverteType;
 use App\Form\ThematiqueType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -80,7 +82,7 @@ class AdminController extends Controller
     /**
      * @param Thematique $thematique
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     * @Route("/thematique/{thematique}/remove", name="admin_remove_thematique")
+     * @Route("/admin/thematique/{thematique}/remove", name="admin_remove_thematique")
      */
     public function removeThematique(Thematique $thematique){
         $manager = $this->getDoctrine()->getManager();
@@ -93,11 +95,42 @@ class AdminController extends Controller
 
     /**
      * @param Request $request
+     * @param Question $question
+     * @Route("/admin/question/modifier/{question}", name="admin_modifier_question", requirements={"question"="\d+"} )
+     */
+    public function updateQuestion(Request $request, Question $question){
+        if($question->getReponses() && get_class($question->getReponses()->first()) == ReponsesFerme::class){
+            if($question->getReponsePreRequise()->count() == 0){
+                return $this->questionFermeeSansFiltre($request,$question);
+            }else{
+                if($question->getReponsePreRequise()->count() > 1){
+                    // Avec Filtre -> Ferméees
+                }else{
+                   return $this->sousQuestionFermeeSansFiltre($request,$question);
+                }
+            }
+        }elseif ($question->getReponses() && get_class($question->getReponses()->first()) == ReponsesOuverte::class) {
+            if ($question->getReponsePreRequise()->count() == 0) {
+                return $this->questionOuverteSansFiltre($request,$question);
+            } else {
+                if ($question->getReponsePreRequise()->count() > 1) {
+                    // Avec Filtre -> ouvert
+                } else {
+                    return $this->sousQuestionOuverteSansFiltre($request,$question);
+                }
+            }
+        }
+
+        throw new LogicException();
+    }
+
+    /**
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @Route("/question/ouverte/sans_filtre/add", name="admin_add_qosf")
      */
-    public function questionOuverteSansFiltre(Request $request){
-        return $this->questions($request, QuestionOuverteType::class);
+    public function questionOuverteSansFiltre(Request $request,Question $question = null){
+        return $this->questions($request, QuestionOuverteType::class,$question);
     }
 
     /**
@@ -105,8 +138,9 @@ class AdminController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @Route("/sous_question/fermee/sans_filtre/add", name="admin_add_sqfsf")
      */
-    public function sousQuestionFermeeSansFiltre(Request $request){
-        return $this->questions($request, SousQuestionFermeType::class);
+    public function sousQuestionFermeeSansFiltre(Request $request, Question $question = null){
+        $data = (($question!==null) ? $question->getReponsePreRequise()->first() : $question);
+        return $this->questions($request, SousQuestionFermeType::class, $data);
     }
 
     /**
@@ -114,8 +148,8 @@ class AdminController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @Route("/question/fermee/sans_filtre/add", name="admin_add_qfsf")
      */
-    public function questionFermeeSansFiltre(Request $request){
-        return $this->questions($request, QuestionFermeeType::class);
+    public function questionFermeeSansFiltre(Request $request, Question $question = null){
+        return $this->questions($request, QuestionFermeeType::class, $question);
     }
 
     /**
@@ -123,8 +157,9 @@ class AdminController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @Route("/sous_question/ouverte/sans_filtre/add", name="admin_add_sqosf")
      */
-    public function sousQuestionOuverteSansFiltre(Request $request){
-        return $this->questions($request, SousQuestionOuverteType::class);
+    public function sousQuestionOuverteSansFiltre(Request $request, Question $question = null){
+        $data = (($question!==null) ? $question->getReponsePreRequise()->first() : $question);
+        return $this->questions($request, SousQuestionOuverteType::class,$data);
     }
 
     /**
@@ -132,10 +167,10 @@ class AdminController extends Controller
      * @param $type
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    private function questions(Request $request, $type){
-        $form = $this->createForm($type);
-        $form->add('Envoyer',SubmitType::class,array(
-
+    private function questions(Request $request, $type, $data = null){
+        $form = $this->createForm($type,$data);
+        $form->add('envoyer',SubmitType::class,array(
+            'label' => ($data !== null) ? "Modifier la question" : "Créer la question",
         ));
         $form->handleRequest($request);
 
@@ -152,7 +187,7 @@ class AdminController extends Controller
 
         return $this->render('admin\form.html.twig',array(
             'form'=> $form->createView(),
-            'h1' => "Ajouter une question"
+            'h1' => (($data !== null) ? "Modifier" : "Ajouter") . " une question"
         ));
     }
 

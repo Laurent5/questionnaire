@@ -46,4 +46,11 @@ abstract class QuestionAbstractType extends AbstractType
             'data_class' => Question::class,
         ]);
     }
+
+    protected function setDataAt($form, $fieldName, $optionName, $optionValue){
+        $typeForm = $form->get($fieldName)->getConfig()->getType()->getInnerType();
+        $options = $form->get($fieldName)->getConfig()->getOptions();
+        $options[$optionName] = $optionValue;
+        $form->add($fieldName,get_class($typeForm),$options);
+    }
 }

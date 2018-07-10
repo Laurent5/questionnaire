@@ -67,6 +67,7 @@ class SousQuestionOuverteType extends AbstractType
             ))
 
             ->addEventListener(FormEvents::POST_SUBMIT, array($this,'onPostSubmit'))
+            ->addEventListener(FormEvents::POST_SET_DATA, array($this,'onPostSetData'))
 
         ;
 
@@ -85,5 +86,22 @@ class SousQuestionOuverteType extends AbstractType
 
         $data->getQuestion()->setThematique($data->getReponse()->getQuestion()->getThematique());
         $data->setOptionnel(false);
+    }
+
+    public function onPostSetData(FormEvent $formEvent){
+        /** @var null|QuestionPrerequis $data */
+        $data = $formEvent->getData();
+
+        if($data!==null){
+            $question = $data->getReponse()->getQuestion();
+            $this->setDataAt($formEvent->getForm(), 'question_pre_requis', 'data', $question);
+        }
+    }
+
+    protected function setDataAt($form, $fieldName, $optionName, $optionValue){
+        $typeForm = $form->get($fieldName)->getConfig()->getType()->getInnerType();
+        $options = $form->get($fieldName)->getConfig()->getOptions();
+        $options[$optionName] = $optionValue;
+        $form->add($fieldName,get_class($typeForm),$options);
     }
 }
