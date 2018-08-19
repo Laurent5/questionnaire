@@ -4,6 +4,51 @@ var prefix;
 // setup an "add a tag" link
 var $addReponse = $('<a href="#" id="add_reponse"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Ajouter une réponse</a>');
 
+var listesChoixQuestion;
+
+function selectedDoIt(){
+    listesChoixQuestion = $("select[data-selected='data-selected']");
+
+
+    listesChoixQuestion.each(function() {
+        $(this).on('change',function(){
+            var idSelected = $(this).find(':selected').val();
+
+            const regex = /\d+/;
+            let m;
+
+            var reponse = null;
+            if ((m = regex.exec($(this).attr('id'))) !== null) {
+                m.forEach((match, groupIndex) => {
+                    reponse = $("select[id$='_" + match + "_reponse'][data-reponses='data-reponses']").first()
+                });
+            }else{
+                reponse = $("select[data-reponses='data-reponses']").first();
+            }
+
+            var oldSelected = reponse.find(':selected').val();
+
+            if(idSelected !== ''){
+                $.ajax({
+                    url: window.location.protocol + '//' + window.location.host + '/admin/reponses/get/' + idSelected,
+                    success: function (data) {
+                        reponse.html(data);
+                        if(oldSelected != undefined && reponse.find("option[value='"+oldSelected+"']").length > 0)
+                        {
+                            reponse.val(oldSelected);
+                        }
+
+                    }
+                });
+            }else{
+                reponse.html('');
+            }
+        });
+    });
+
+    listesChoixQuestion.trigger('change');
+}
+
 function addForm($collectionHolder, $newLink) {
     // Get the data-prototype explained earlier
     var prototype = $collectionHolder.data('prototype');
@@ -28,6 +73,7 @@ function addForm($collectionHolder, $newLink) {
     $newLink.before($(newForm));
 
     addFormDelete($('div#' + prefix + index));
+    selectedDoIt();
 
 
 }
@@ -44,8 +90,6 @@ function addFormDelete($form) {
         $form.remove();
     });
 }
-
-
 
 jQuery(document).ready(function() {
     // Get the ul that holds the collection of tags
@@ -69,4 +113,6 @@ jQuery(document).ready(function() {
         // add a new tag form (see next code block)
         addForm($collectionHolder, $addReponse);
     });
+
+    selectedDoIt();
 });

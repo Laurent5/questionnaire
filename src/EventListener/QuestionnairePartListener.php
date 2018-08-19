@@ -69,8 +69,6 @@ class QuestionnairePartListener implements EventSubscriberInterface
             $this->traitReponse($key,$value,$reponses);
         }
 
-        dump($reponses);
-
         $event->setData($reponses);
     }
 

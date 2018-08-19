@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\QuestionRepository")
@@ -48,8 +49,8 @@ class Question
     private $thematique;
 
     /**
-     * @var QuestionPrerequis
-     * @ORM\OneToMany(targetEntity="QuestionPrerequis", mappedBy="question")
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="QuestionPrerequis", mappedBy="question", cascade={"persist"})
      */
     private $reponsePreRequise;
 
@@ -182,6 +183,33 @@ class Question
         $this->aide = $aide;
 
         return $this;
+    }
+
+    /**
+     * @Assert\Callback
+     */
+    public function validate(ExecutionContextInterface $context, $payload){
+        if($this->getReponsePreRequise()->count() !== 0){
+            $tab = new ArrayCollection();
+
+            /** @var QuestionPrerequis $reponse */
+            foreach ($this->reponsePreRequise as $reponse){
+                if($tab->contains($reponse->getReponse()->getId())){
+                    $context->buildViolation("Vous avez sélectionné deux fois la même réponse")->atPath("reponsesPreRequise")->addViolation();
+                }
+                if($this->getReponsePreRequise()->count() > 1){
+                    //On est dans le cas des réponses avec filtre
+                    if($reponse->getReponse()->getQuestion()->getThematique() == $this->thematique){
+                        $context->buildViolation("Les réponses avec filtres doivent être dans des thématiques différentes")->atPath("reponsesPreRequise")->addViolation();
+                    }
+                    if($reponse->getReponse()->getQuestion()->getThematique()->getOrdre() > $this->thematique->getOrdre()){
+                        $context->buildViolation("Les réponses doivent être dans une thématique située avant la question")->atPath("reponsesPreRequise")->addViolation();
+                    }
+                }
+
+                $tab->add($reponse->getReponse()->getId());
+            }
+        }
     }
     
 }

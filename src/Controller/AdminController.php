@@ -10,10 +10,13 @@ namespace App\Controller;
 
 
 use App\Entity\Question;
+use App\Entity\QuestionPrerequis;
 use App\Entity\ReponsesFerme;
 use App\Entity\ReponsesOuverte;
 use App\Entity\Thematique;
+use App\Form\FiltreType;
 use App\Form\QuestionFermeeType;
+use App\Form\QuestionOuverteAvecFiltreType;
 use App\Form\QuestionOuverteType;
 use App\Form\SousQuestionFermeType;
 use App\Form\SousQuestionOuverteType;
@@ -114,7 +117,7 @@ class AdminController extends Controller
                 return $this->questionOuverteSansFiltre($request,$question);
             } else {
                 if ($question->getReponsePreRequise()->count() > 1) {
-                    // Avec Filtre -> ouvert
+                    return $this->questionOuverteAvecFiltre($request,$question);
                 } else {
                     return $this->sousQuestionOuverteSansFiltre($request,$question);
                 }
@@ -131,6 +134,15 @@ class AdminController extends Controller
      */
     public function questionOuverteSansFiltre(Request $request,Question $question = null){
         return $this->questions($request, QuestionOuverteType::class,$question);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @Route("/question/ouverte/avec_filtre/add", name="admin_add_qoaf")
+     */
+    public function questionOuverteAvecFiltre(Request $request,Question $question = null){
+        return $this->questions($request, QuestionOuverteAvecFiltreType::class,$question);
     }
 
     /**
