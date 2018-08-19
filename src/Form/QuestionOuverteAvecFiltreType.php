@@ -10,12 +10,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 
@@ -53,6 +55,11 @@ class QuestionOuverteAvecFiltreType extends QuestionAbstractType
                 )))
             ))
 
+            ->add('obligatoire',CheckboxType::class,array(
+                'mapped' => false,
+                'label' => 'Est-ce que la réponse à cette question est obligatoire ?'
+            ))
+
             ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))
             ->addEventListener(FormEvents::POST_SET_DATA, array($this,'onPostSetData'))
         ;
@@ -64,6 +71,7 @@ class QuestionOuverteAvecFiltreType extends QuestionAbstractType
 
         $reponse = new ReponsesOuverte();
         $reponse->setType($this->manager->getRepository(Type::class)->find($data["reponses_type"]));
+        $reponse->setObligatoire($data['obligatoire']);
 
         $collection = new ArrayCollection();
         $collection->add($reponse);
@@ -83,6 +91,7 @@ class QuestionOuverteAvecFiltreType extends QuestionAbstractType
             $tab = $formEvent->getData();
 
             $this->setDataAt($formEvent->getForm(), 'reponses_type', 'data', $reponse->getType());
+            $this->setDataAt($formEvent->getForm(), 'obligatoire', 'data', $reponse->getObligatoire());
 
 
         }

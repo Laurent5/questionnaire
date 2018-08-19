@@ -107,6 +107,9 @@ class FormQuestionnaireFactory
         /** @var Reponses $question */
         $reponse = $question->getReponses()->first();
         $optionArray['label'] = $question->getQuestion();
+        if($question->getAide()!==null){
+            $optionArray['help'] = $question->getAide();
+        }
 
         switch (get_class($reponse)){
             case ReponsesFerme::class :
@@ -153,14 +156,16 @@ class FormQuestionnaireFactory
                         break;
                     case 'Texte' :
                         $formType = TextareaType::class;
-                        $optionArray['constraints'] = array(
-                            new NotBlank(),
-                            new NotNull(),
-                            new Length(array(
-                                'min' => 10,
-                                'minMessage' => 'Merci d\'entrer au moins {{ limit }} caractères'
-                            ))
-                        );
+                        if($reponse->getObligatoire()) {
+                            $optionArray['constraints'] = array(
+                                new NotBlank(),
+                                new NotNull(),
+                                new Length(array(
+                                    'min' => 2,
+                                    'minMessage' => 'Merci d\'entrer au moins {{ limit }} caractères'
+                                ))
+                            );
+                        }
                         break;
                 }
 
