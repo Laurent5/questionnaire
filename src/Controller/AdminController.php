@@ -237,4 +237,19 @@ class AdminController extends Controller
 
     }
 
+    /**
+     * @param Question $question
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @Route("/remove/{question}", name="admin_remove_question")
+     */
+    public function removeQuestion(Question $question){
+        $manager = $this->getDoctrine()->getManager();
+        $manager->remove($question);
+        $manager->flush();
+
+        $this->addFlash("success", "La question a bien été supprimée");
+
+        return $this->redirectToRoute("admin_home");
+    }
+
 }

@@ -21,7 +21,7 @@ abstract class ReponsesFourniesIndividuelles
 
     /**
      * @var Reponses
-     * @ORM\ManyToOne(targetEntity="Question")
+     * @ORM\ManyToOne(targetEntity="Question", inversedBy="reponsesFourniesIndividuelles")
      */
     private $questions;
 

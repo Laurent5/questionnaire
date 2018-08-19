@@ -37,9 +37,15 @@ class Question
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Reponses", mappedBy="question", cascade={"persist"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="Reponses", mappedBy="question", cascade={"persist","remove"}, orphanRemoval=true)
      */
     private $reponses;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ReponsesFourniesIndividuelles", mappedBy="questions",  cascade={"remove"})
+     */
+    private $reponsesFourniesIndividuelles;
 
     /**
      * @var Thematique
@@ -50,7 +56,7 @@ class Question
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="QuestionPrerequis", mappedBy="question", cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="QuestionPrerequis", mappedBy="question", cascade={"persist", "remove"})
      */
     private $reponsePreRequise;
 

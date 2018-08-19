@@ -13,7 +13,7 @@ class ReponsesFerme extends Reponses
 {
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="QuestionPrerequis", mappedBy="reponse")
+     * @ORM\OneToMany(targetEntity="QuestionPrerequis", mappedBy="reponse", orphanRemoval=true)
      */
     private $questions;
 

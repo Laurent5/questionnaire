@@ -31,7 +31,7 @@ class ReponsesFournies
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="ReponsesFourniesIndividuelles", mappedBy="questionnaire", cascade={ "persist" })
+     * @ORM\OneToMany(targetEntity="ReponsesFourniesIndividuelles", mappedBy="questionnaire", cascade={ "persist", "remove"}, orphanRemoval=true)
      */
     private $reponses;
 
