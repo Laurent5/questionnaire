@@ -1,8 +1,6 @@
-var $collectionHolder;
-var prefix;
-
 // setup an "add a tag" link
-var $addReponse = $('<a href="#" id="add_reponse"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Ajouter une réponse</a>');
+
+var collection = {};
 
 var listesChoixQuestion;
 
@@ -49,7 +47,7 @@ function selectedDoIt(){
     listesChoixQuestion.trigger('change');
 }
 
-function addForm($collectionHolder, $newLink) {
+function addForm($collectionHolder, $newLink, prefix) {
     // Get the data-prototype explained earlier
     var prototype = $collectionHolder.data('prototype');
 
@@ -79,7 +77,7 @@ function addForm($collectionHolder, $newLink) {
 }
 
 function addFormDelete($form) {
-    var $removeFormLink = $('<a href="#" id="add_reponse"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Supprimer cette réponse</a>');
+    var $removeFormLink = $('<a href="#" id="remove_reponse"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Supprimer cette réponse</a>');
     $form.append($removeFormLink);
 
 
@@ -93,25 +91,32 @@ function addFormDelete($form) {
 
 jQuery(document).ready(function() {
     // Get the ul that holds the collection of tags
-    $collectionHolder = $("div[data-collection='data-collection']").first();
-    prefix = $collectionHolder.attr('id') + "_";
+    $("div[data-collection='data-collection']").each(function (index) {
 
-    // add a delete link to all of the existing tag form li elements
-    $collectionHolder.find("div[id^='" + prefix + "']").each(function() {
-        addFormDelete($(this));
-    });
+        var $addReponse = $('<a href="#" id="add_reponse_' + index + '"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Ajouter une réponse</a>');
+        collection[index] = $(this);
 
-    // add the "add a tag" anchor and li to the tags ul
-    $collectionHolder.append($addReponse);
+        var prefix = collection[index].attr('id') + "_";
 
-    // count the current form inputs we have (e.g. 2), use that as the new
-    // index when inserting a new item (e.g. 2)
-    $collectionHolder.data('index', $collectionHolder.find(':input').length);
+        // add a delete link to all of the existing tag form li elements
+        collection[index].find("div[id^='" + prefix + "']").each(function () {
+            addFormDelete($(this))
+        });
 
-    $addReponse.on('click', function(e) {
-        e.preventDefault();
-        // add a new tag form (see next code block)
-        addForm($collectionHolder, $addReponse);
+        // add the "add a tag" anchor and li to the tags ul
+        collection[index].append($addReponse);
+
+        // count the current form inputs we have (e.g. 2), use that as the new
+        // index when inserting a new item (e.g. 2)
+        collection[index].data('index', $(this).find(':input').length);
+
+        $addReponse.on('click', function (e) {
+            e.preventDefault();
+
+            // add a new tag form (see next code block)
+            addForm(collection[index], $(this), prefix);
+        });
+
     });
 
     selectedDoIt();

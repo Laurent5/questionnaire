@@ -10,16 +10,18 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 
-class QuestionOuverteAvecFiltreType extends QuestionAbstractType
+class QuestionFermeAvecFiltreType extends QuestionAbstractType
 {
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -27,16 +29,20 @@ class QuestionOuverteAvecFiltreType extends QuestionAbstractType
         parent::buildForm($builder,$options);
 
         $builder
-            ->add('reponses_type',EntityType::class,array(
-                'class' => Type::class,
+            ->add('multiple',CheckboxType::class,array(
+                'label' => 'Est-ce que les répondants peuvent choisirs plusieurs réponses ?',
                 'mapped' => false,
-                'label' => 'De quelle type doit-être la réponse ?',
-                'choice_label' => 'type'
+                'required' => false
             ))
-
-            ->add('reponses',HiddenType::class, array(
-                'data' => null,
-
+            ->add('reponses',CollectionType::class,array(
+                'label' => 'Réponses possibles',
+                'attr' => array('data-collection'=>true),
+                'entry_type' => ReponseFermeeType::class,
+                'entry_options' => array('label'=>false),
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'constraints' => array(new NotBlank(), new NotNull())
             ))
 
             ->add('reponsePreRequise',CollectionType::class,array(
@@ -54,38 +60,27 @@ class QuestionOuverteAvecFiltreType extends QuestionAbstractType
             ))
 
             ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))
-            ->addEventListener(FormEvents::POST_SET_DATA, array($this,'onPostSetData'))
+            ->addEventListener(FormEvents::POST_SUBMIT,array($this,'onPostSubmit'))
         ;
     }
 
     public function onPreSubmit(FormEvent $formEvent){
+        /** @var Question $data */
         $data = $formEvent->getData();
-        $reponse = null;
-
-        $reponse = new ReponsesOuverte();
-        $reponse->setType($this->manager->getRepository(Type::class)->find($data["reponses_type"]));
-
-        $collection = new ArrayCollection();
-        $collection->add($reponse);
-        $data['reponses'] = $collection;
-
-        $formEvent->setData($data);
+        $this->multiple = array_key_exists('multiple', $data);
 
     }
 
-    public function onPostSetData(FormEvent $formEvent){
-        /** @var Question|null $data */
+    public function onPostSubmit(FormEvent $formEvent){
+
+        /** @var Question $data */
         $data = $formEvent->getData();
 
-        if($data !== null){
-            /** @var ReponsesOuverte $reponse */
-            $reponse = $data->getReponses()->first();
-            $tab = $formEvent->getData();
-
-            $this->setDataAt($formEvent->getForm(), 'reponses_type', 'data', $reponse->getType());
-
-
+        /** @var ReponsesFerme $reponses */
+        foreach ($data->getReponses() as $reponses){
+            $reponses->setMultiple($this->multiple);
         }
+
     }
 
 }

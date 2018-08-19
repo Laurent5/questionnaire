@@ -15,6 +15,7 @@ use App\Entity\ReponsesFerme;
 use App\Entity\ReponsesOuverte;
 use App\Entity\Thematique;
 use App\Form\FiltreType;
+use App\Form\QuestionFermeAvecFiltreType;
 use App\Form\QuestionFermeeType;
 use App\Form\QuestionOuverteAvecFiltreType;
 use App\Form\QuestionOuverteType;
@@ -107,7 +108,7 @@ class AdminController extends Controller
                 return $this->questionFermeeSansFiltre($request,$question);
             }else{
                 if($question->getReponsePreRequise()->count() > 1){
-                    // Avec Filtre -> Ferméees
+                    return $this->questionFermeeAvecFiltre($request,$question);
                 }else{
                    return $this->sousQuestionFermeeSansFiltre($request,$question);
                 }
@@ -162,6 +163,15 @@ class AdminController extends Controller
      */
     public function questionFermeeSansFiltre(Request $request, Question $question = null){
         return $this->questions($request, QuestionFermeeType::class, $question);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @Route("/question/fermee/avec_filtre/add", name="admin_add_qfaf")
+     */
+    public function questionFermeeAvecFiltre(Request $request, Question $question = null){
+        return $this->questions($request, QuestionFermeAvecFiltreType::class, $question);
     }
 
     /**
