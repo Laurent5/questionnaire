@@ -22,6 +22,8 @@ use App\Form\QuestionOuverteType;
 use App\Form\SousQuestionFermeType;
 use App\Form\SousQuestionOuverteType;
 use App\Form\ThematiqueType;
+use App\Service\FormQuestionnaireFactory;
+use function Sodium\add;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -45,6 +47,27 @@ class AdminController extends Controller
         return $this->render('admin\home.html.twig',array(
             'thematiques' => $this->getDoctrine()->getRepository(Thematique::class)->findBy(array(),array('ordre'=>'ASC')),
             'questions' => $this->getDoctrine()->getRepository(Question::class)->findBy(array(),array('ordre'=>'ASC'))
+        ));
+    }
+
+
+    /**
+     * @param Thematique $thematique
+     * @param Request $request
+     * @param FormQuestionnaireFactory $factory
+     * @Route("/view/thematique/{thematique}", name="admin_view_thematique")
+     * @return Response
+     */
+    public function viewThematique(Thematique $thematique, Request $request, FormQuestionnaireFactory $factory){
+        $form = $factory->getFormFor($thematique);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            $this->addFlash("success","Ceci est une simulation - Le formulaire est conssidéré comme valide ...");
+        }
+
+        return $this->render('questionnaire/home.html.twig',array(
+            'form' => $form->createView()
         ));
     }
 
@@ -86,7 +109,7 @@ class AdminController extends Controller
     /**
      * @param Thematique $thematique
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     * @Route("/admin/thematique/{thematique}/remove", name="admin_remove_thematique")
+     * @Route("/thematique/{thematique}/remove", name="admin_remove_thematique")
      */
     public function removeThematique(Thematique $thematique){
         $manager = $this->getDoctrine()->getManager();
@@ -100,7 +123,7 @@ class AdminController extends Controller
     /**
      * @param Request $request
      * @param Question $question
-     * @Route("/admin/question/modifier/{question}", name="admin_modifier_question", requirements={"question"="\d+"} )
+     * @Route("/question/modifier/{question}", name="admin_modifier_question", requirements={"question"="\d+"} )
      */
     public function updateQuestion(Request $request, Question $question){
         if($question->getReponses() && get_class($question->getReponses()->first()) == ReponsesFerme::class){

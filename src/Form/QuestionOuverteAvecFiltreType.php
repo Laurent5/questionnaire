@@ -26,15 +26,8 @@ class QuestionOuverteAvecFiltreType extends QuestionAbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::buildForm($builder,$options);
 
         $builder
-            ->add('reponses_type',EntityType::class,array(
-                'class' => Type::class,
-                'mapped' => false,
-                'label' => 'De quelle type doit-être la réponse ?',
-                'choice_label' => 'type'
-            ))
 
             ->add('reponses',HiddenType::class, array(
                 'data' => null,
@@ -54,10 +47,22 @@ class QuestionOuverteAvecFiltreType extends QuestionAbstractType
                     'minMessage' => "Une réponse avec filtre, doit contenir au moins 2 filtres"
                 )))
             ))
+                    ;
+
+        parent::buildForm($builder,$options);
+
+        $builder
+            ->add('reponses_type',EntityType::class,array(
+                'class' => Type::class,
+                'mapped' => false,
+                'label' => 'De quelle type doit-être la réponse ?',
+                'choice_label' => 'type'
+            ))
 
             ->add('obligatoire',CheckboxType::class,array(
                 'mapped' => false,
-                'label' => 'Est-ce que la réponse à cette question est obligatoire ?'
+                'label' => 'Est-ce que la réponse à cette question est obligatoire ?',
+                'required' => false
             ))
 
             ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))

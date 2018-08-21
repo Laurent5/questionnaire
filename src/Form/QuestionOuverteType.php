@@ -38,7 +38,8 @@ class QuestionOuverteType extends QuestionAbstractType
             ))
             ->add('obligatoire',CheckboxType::class,array(
                 'mapped' => false,
-                'label' => 'Est-ce que la réponse à cette question est obligatoire ?'
+                'label' => 'Est-ce que la réponse à cette question est obligatoire ?',
+                'required' => false
             ))
             ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))
             ->addEventListener(FormEvents::POST_SET_DATA, array($this,'onPostSetData'))

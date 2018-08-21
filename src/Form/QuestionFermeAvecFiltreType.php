@@ -26,26 +26,8 @@ class QuestionFermeAvecFiltreType extends QuestionAbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::buildForm($builder,$options);
-
         $builder
-            ->add('multiple',CheckboxType::class,array(
-                'label' => 'Est-ce que les répondants peuvent choisirs plusieurs réponses ?',
-                'mapped' => false,
-                'required' => false
-            ))
-            ->add('reponses',CollectionType::class,array(
-                'label' => 'Réponses possibles',
-                'attr' => array('data-collection'=>true),
-                'entry_type' => ReponseFermeeType::class,
-                'entry_options' => array('label'=>false),
-                'allow_add' => true,
-                'allow_delete' => true,
-                'by_reference' => false,
-                'constraints' => array(new NotBlank(), new NotNull())
-            ))
-
-            ->add('reponsePreRequise',CollectionType::class,array(
+               ->add('reponsePreRequise',CollectionType::class,array(
                 'label' => 'Filtres',
                 'attr' => array('data-collection'=>true),
                 'entry_type' => FiltreType::class,
@@ -58,6 +40,27 @@ class QuestionFermeAvecFiltreType extends QuestionAbstractType
                     'minMessage' => "Une réponse avec filtre, doit contenir au moins 2 filtres"
                 )))
             ))
+        ;
+        parent::buildForm($builder,$options);
+
+        $builder
+            ->add('multiple',CheckboxType::class,array(
+                'label' => 'Est-ce que les répondants peuvent choisirs plusieurs réponses ?',
+                'mapped' => false,
+                'required' => false
+            ))
+
+            ->add('reponses',CollectionType::class,array(
+                'label' => 'Réponses possibles',
+                'attr' => array('data-collection'=>true),
+                'entry_type' => ReponseFermeeType::class,
+                'entry_options' => array('label'=>false),
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'constraints' => array(new NotBlank(), new NotNull())
+            ))
+
 
             ->addEventListener(FormEvents::PRE_SUBMIT,array($this,'onPreSubmit'))
             ->addEventListener(FormEvents::POST_SUBMIT,array($this,'onPostSubmit'))
