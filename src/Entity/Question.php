@@ -205,9 +205,7 @@ class Question
                 }
                 if($this->getReponsePreRequise()->count() > 1){
                     //On est dans le cas des réponses avec filtre
-                    if($reponse->getReponse()->getQuestion()->getThematique() == $this->thematique){
-                        $context->buildViolation("Les réponses avec filtres doivent être dans des thématiques différentes")->atPath("reponsesPreRequise")->addViolation();
-                    }
+
                     if($reponse->getReponse()->getQuestion()->getThematique()->getOrdre() > $this->thematique->getOrdre()){
                         $context->buildViolation("Les réponses doivent être dans une thématique située avant la question")->atPath("reponsesPreRequise")->addViolation();
                     }

@@ -52,7 +52,7 @@ class QuestionOuverteType extends QuestionAbstractType
 
         $reponse = new ReponsesOuverte();
         $reponse->setType($this->manager->getRepository(Type::class)->find($data["reponses_type"]));
-        $reponse->setObligatoire($data['obligatoire']);
+        $reponse->setObligatoire(array_key_exists('obligatoire',$data));
 
         $collection = new ArrayCollection();
         $collection->add($reponse);
