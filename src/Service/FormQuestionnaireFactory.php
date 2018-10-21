@@ -205,7 +205,6 @@ class FormQuestionnaireFactory
                 break;
 
             default:
-                dump($reponse);
                 Throw new \LogicException("Ce type de réponse n'est pas pris en charge : " . ClassUtils::getClass($reponse));
         }
 
@@ -263,9 +262,6 @@ class FormQuestionnaireFactory
         foreach ($question->getReponsePreRequise() as $reponsePreRecquise) {
             /** @var Reponses $reponse */
             $reponsePR = $reponsePreRecquise->getReponse();
-            if (!$questionnaire->getReponses()->contains($reponsePR) && !$reponsePreRecquise->getOptionnel()) {
-                $ok = false;
-            }
 
             if ($reponsePreRecquise->getOptionnel()) {
                 $nombreTotalOptionnel += 1;
@@ -275,6 +271,14 @@ class FormQuestionnaireFactory
                 foreach ($questionnaire->getReponses() as $reponsesFourniesIndividuelles){
                     if(ClassUtils::getClass($reponsesFourniesIndividuelles)==ReponsesFourniesIndividuellesFerme::class && $reponsesFourniesIndividuelles->getReponsesFerme()->getId() == $reponsePR->getId()){
                         $nombreOptionnelOk += 1;
+                    }
+                }
+            }else{
+                $ok = false;
+                foreach ($questionnaire->getReponses() as $reponsesFourniesIndividuelles){
+                    if(ClassUtils::getClass($reponsesFourniesIndividuelles) == ReponsesFourniesIndividuellesFerme::class && $reponsesFourniesIndividuelles->getReponsesFerme()->getId() == $reponsePR->getId()){
+                        $ok = true;
+                        break;
                     }
                 }
             }
