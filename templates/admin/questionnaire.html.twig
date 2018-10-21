@@ -1,0 +1,27 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block body %}
+    <h1>Analyse du questionnaire numéro {{ questionnaire.questionnaireId }}</h1>
+    <h2>Réponses fournies : {{ questionnaire.reponses|length }}</h2>
+    <h2>Token du repondant : {{ questionnaire.repondantToken }}</h2>
+    <br \>
+    <table class="table-responsive table table-hover">
+    <thead>
+    <tr>
+        <th>Numéro unique</th>
+        <th>Question</th>
+        <th>Réponse</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for reponse in questionnaire.reponses %}
+        <tr>
+            <td>{{ reponse.questions.ordre }}</td>
+            <td>{{ reponse.questions.question }}</td>
+            <td>{{ reponse.valeur }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+
+
+{% endblock %}

@@ -14,12 +14,15 @@ use App\Entity\QuestionPrerequis;
 use App\Entity\Reponses;
 use App\Entity\ReponsesFerme;
 use App\Entity\ReponsesFournies;
+use App\Entity\ReponsesFourniesIndividuellesFerme;
 use App\Entity\ReponsesOuverte;
 use App\Entity\Thematique;
 use App\EventListener\QuestionnairePartListener;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\PersistentCollection;
+use PhpParser\Node\Stmt\Throw_;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -28,17 +31,19 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Type;
+use Doctrine\Common\Util\ClassUtils;
 
 class FormQuestionnaireFactory
 {
-    /** @var ManagerRegistry  */
+    /** @var ManagerRegistry */
     private $register;
-    /** @var FormFactory  */
+    /** @var FormFactory */
     private $formFactory;
     /** @var ManagerRegistry */
     private $manager;
@@ -54,9 +59,10 @@ class FormQuestionnaireFactory
      * @param Thematique $thematique
      * @return \Symfony\Component\Form\FormInterface
      */
-    public function getFormFor(Thematique $thematique){
+    public function getFormFor(Thematique $thematique, ReponsesFournies $questionnaire = null)
+    {
 
-        $form = $this->formFactory->createBuilder(FormType::class,null,array(
+        $form = $this->formFactory->createBuilder(FormType::class, null, array(
             'allow_extra_fields' => true
         ));
         $form->addEventSubscriber(
@@ -66,52 +72,67 @@ class FormQuestionnaireFactory
         $form = $form->getForm();
 
 
-        $questions = $this->orderAndFilter($thematique->getQuestions());
+        $questions = $this->orderAndFilter($thematique->getQuestions(), $questionnaire);
 
         /** @var Question $question */
-        foreach ($questions as $question){
-            $form = $this->createFormFromQuestion($question,$form);
+        foreach ($questions as $question) {
+            $retour = $this->createFormFromQuestion($question, $form);
+            if ($retour != null) {
+                $form = $retour;
+            }
+
+
         }
 
-        $form->add("Suivant",SubmitType::class);
+        $form->add("Suivant", SubmitType::class);
 
         return $form;
 
     }
 
-    private function orderAndFilter(PersistentCollection $questions){
+    private function orderAndFilter(PersistentCollection $questions, ReponsesFournies $questionnaire = null)
+    {
         /** @var Question $question */
-        foreach ($questions as $key => $question){
-            if($question instanceof Question && $question->getOrdre() === null){
+        foreach ($questions as $key => $question) {
+            if ($question instanceof Question && $question->getOrdre() === null) {
                 $questions->remove($key);
+            }
+
+            //Est-ce une sous-question ou une question avec filtre ?
+            if ($question->getReponsePreRequise()->count() > 0 && !$this->preRequisOk($question,$questionnaire) ){
+                $questions->remove($key);
+
             }
         }
 
         $questions = $questions->toArray();
-        usort($questions , array(Question::class,"order"));
+        usort($questions, array(Question::class, "order"));
 
         return $questions;
     }
 
+
     /**
      * @param Question $question
      * @param FormInterface|null $form
-     * @return FormInterface
+     * @return FormInterface|null
      */
-    public function createFormFromQuestion(Question $question, FormInterface $form = null){
-        if($form === null)
-        {
+    public function createFormFromQuestion(Question $question, FormInterface $form = null)
+    {
+
+        if ($form === null) {
             $form = $this->formFactory->create();
         }
+
 
         /** @var Reponses $question */
         $reponse = $question->getReponses()->first();
         $optionArray['label'] = $question->getQuestion();
-        if($question->getAide()!==null){
+        if ($question->getAide() !== null) {
             $optionArray['help'] = $question->getAide();
         }
 
-        switch (get_class($reponse)){
+        switch (ClassUtils::getClass($reponse)) {
             case ReponsesFerme::class :
                 /** @var ReponsesFerme $reponse */
                 $formType = ChoiceType::class;
@@ -122,7 +143,7 @@ class FormQuestionnaireFactory
                 foreach ($question->getReponses() as $reponse) {
                     $values[$reponse->getTexte()] = $reponse->getId();
                     if ($reponse->getQuestions()->count() > 0) {
-                        $addRoute["data-route-".$reponse->getId()] = true;
+                        $addRoute["data-route-" . $reponse->getId()] = true;
                         $expensed = true;
                     }
                 }
@@ -130,6 +151,17 @@ class FormQuestionnaireFactory
                 $optionArray['choices'] = $values;
                 $optionArray['expanded'] = true;
                 $optionArray['multiple'] = $reponse->getMultiple();
+                $addRoute["data-multiple"] = $reponse->getMultiple();
+                if ($reponse->getMultiple()) {
+                    $optionArray['required'] = true;
+                    $optionArray['constraints'] = array(
+                        new NotBlank(),
+                        new NotNull(),
+                        new Count(array(
+                            'min' => 1
+                        ))
+                    );
+                }
                 $optionArray['attr'] = $addRoute;
 
                 break;
@@ -138,7 +170,7 @@ class FormQuestionnaireFactory
                 $formType = null;
                 $constraints = null;
                 /** @var ReponsesOuverte $reponse */
-                switch ($reponse->getType()->getType()){
+                switch ($reponse->getType()->getType()) {
                     case 'Nombre entier' :
                         $formType = IntegerType::class;
                         $optionArray['constraints'] = array(
@@ -156,7 +188,7 @@ class FormQuestionnaireFactory
                         break;
                     case 'Texte' :
                         $formType = TextareaType::class;
-                        if($reponse->getObligatoire()) {
+                        if ($reponse->getObligatoire()) {
                             $optionArray['constraints'] = array(
                                 new NotBlank(),
                                 new NotNull(),
@@ -171,52 +203,90 @@ class FormQuestionnaireFactory
 
 
                 break;
+
+            default:
+                dump($reponse);
+                Throw new \LogicException("Ce type de réponse n'est pas pris en charge : " . ClassUtils::getClass($reponse));
         }
 
-        $form->add($question->getId(),$formType,$optionArray);
+        $form->add($question->getId(), $formType, $optionArray);
 
         return $form;
     }
 
-    public function createFormFromReponse(ReponsesFerme $reponse, ReponsesFournies $reponsesFournies){
+    public function createFormFromReponse(ReponsesFerme $reponse, ReponsesFournies $reponsesFournies)
+    {
         $form = $this->formFactory->create();
 
+        $questionnaireModifie = clone $reponsesFournies;
+
+        $ri = new ReponsesFourniesIndividuellesFerme();
+        $ri->setQuestions($reponse->getQuestion());
+        $ri->setQuestionnaire($questionnaireModifie);
+        $ri->setReponsesFerme($reponse);
+
+        $questionnaireModifie->addReponse($ri);
+
         /** @var QuestionPrerequis $question */
-        foreach ($reponse->getQuestions() as $questionPrerequis){
-            /** @var Question $question */
-            $question = $questionPrerequis->getQuestion();
-            $ok = true;
-            $nombreTotalOptionnel = 0;
-            $nombreOptionnelOk = 0;
-            /** @var QuestionPrerequis $reponsePreRecquise */
-            foreach ($question->getReponsePreRequise() as $reponsePreRecquise){
-                /** @var Reponses $reponse */
-                $reponsePR= $reponsePreRecquise->getReponse();
-                if($reponsePR->getId() != $reponse->getId() && !$reponsesFournies->getReponses()->contains($reponsePR) && !$reponsePreRecquise->getOptionnel()){
-                    $ok = false;
-                }
-
-                if($reponsePreRecquise->getOptionnel()){
-                    $nombreTotalOptionnel += 1;
-
-                    if($reponsesFournies->getReponses()->contains($reponsePR) || $reponsePR->getId() == $reponse->getId()){
-                        $nombreOptionnelOk += 1;
-                    }
-                }
-
-            }
-
-            if($nombreTotalOptionnel > 1 && $nombreOptionnelOk <= 0){
-                $ok = false;
-            }
-
-
-            if($ok){
-                $form = $this->createFormFromQuestion($question,$form);
+        foreach ($reponse->getQuestions() as $question){
+            if ($this->preRequisOk($question->getQuestion(),$questionnaireModifie)) {
+                $form = $this->createFormFromQuestion($question->getQuestion(), $form);
             }
         }
 
+
+        unset($ri);
+        unset($questionnaireModifie);
+
+
+
         return $form;
+    }
+
+    /**
+     * @param Question $question
+     * @param ReponsesFournies $questionnaire
+     * @return bool
+     */
+    private function preRequisOk(Question $question, ReponsesFournies $questionnaire)
+    {
+        if($questionnaire == null || ClassUtils::getClass($questionnaire)!=ReponsesFournies::class){
+            return false;
+        }
+
+        $ok = true;
+        $nombreTotalOptionnel = 0;
+        $nombreOptionnelOk = 0;
+
+
+        /** @var QuestionPrerequis $reponsePreRecquise */
+        foreach ($question->getReponsePreRequise() as $reponsePreRecquise) {
+            /** @var Reponses $reponse */
+            $reponsePR = $reponsePreRecquise->getReponse();
+            if (!$questionnaire->getReponses()->contains($reponsePR) && !$reponsePreRecquise->getOptionnel()) {
+                $ok = false;
+            }
+
+            if ($reponsePreRecquise->getOptionnel()) {
+                $nombreTotalOptionnel += 1;
+
+
+                /** @var ReponsesFourniesIndividuelles $reponsesFourniesIndividuelles */
+                foreach ($questionnaire->getReponses() as $reponsesFourniesIndividuelles){
+                    if(ClassUtils::getClass($reponsesFourniesIndividuelles)==ReponsesFourniesIndividuellesFerme::class && $reponsesFourniesIndividuelles->getReponsesFerme()->getId() == $reponsePR->getId()){
+                        $nombreOptionnelOk += 1;
+                    }
+                }
+            }
+
+        }
+
+        if ($nombreTotalOptionnel > 1 && $nombreOptionnelOk <= 0) {
+            $ok = false;
+        }
+
+        return $ok;
+
     }
 
 }

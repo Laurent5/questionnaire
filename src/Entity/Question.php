@@ -70,6 +70,7 @@ class Question
     {
         $this->reponses = new ArrayCollection();
         $this->reponsePreRequise = new ArrayCollection();
+        $this->reponsesFourniesIndividuelles = new ArrayCollection();
     }
 
     public function getId()
@@ -214,6 +215,37 @@ class Question
                 $tab->add($reponse->getReponse()->getId());
             }
         }
+    }
+
+    /**
+     * @return Collection|ReponsesFourniesIndividuelles[]
+     */
+    public function getReponsesFourniesIndividuelles(): Collection
+    {
+        return $this->reponsesFourniesIndividuelles;
+    }
+
+    public function addReponsesFourniesIndividuelle(ReponsesFourniesIndividuelles $reponsesFourniesIndividuelle): self
+    {
+        if (!$this->reponsesFourniesIndividuelles->contains($reponsesFourniesIndividuelle)) {
+            $this->reponsesFourniesIndividuelles[] = $reponsesFourniesIndividuelle;
+            $reponsesFourniesIndividuelle->setQuestions($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReponsesFourniesIndividuelle(ReponsesFourniesIndividuelles $reponsesFourniesIndividuelle): self
+    {
+        if ($this->reponsesFourniesIndividuelles->contains($reponsesFourniesIndividuelle)) {
+            $this->reponsesFourniesIndividuelles->removeElement($reponsesFourniesIndividuelle);
+            // set the owning side to null (unless already changed)
+            if ($reponsesFourniesIndividuelle->getQuestions() === $this) {
+                $reponsesFourniesIndividuelle->setQuestions(null);
+            }
+        }
+
+        return $this;
     }
     
 }

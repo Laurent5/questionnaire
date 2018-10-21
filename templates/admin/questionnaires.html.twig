@@ -1,0 +1,11 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block body %}
+    <h1>Selection des formulaires</h1>
+    <ul>
+        {% for questionnaire in questionnaires %}
+            <li><a href="{{ path('admin_reponses_by_questionnaire', { 'questionnaire' : questionnaire.id }) }}">{{ questionnaire.questionnaireId }}</a> - {{ questionnaire.reponses|length }} réponses reçues</li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

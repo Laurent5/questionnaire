@@ -1,28 +1,60 @@
 function change(value){
     var id = $(value).attr("id");
-    var selectElement = $("#" + id + " input[type='radio']:checked").val();
-    var routeId = $(value).attr("data-route-"+selectElement);
+    var selectElement = undefined;
+
+    if($("#" + id + " input[type='radio']:checked").length){
+        var selectElement = $("#" + id + " input[type='radio']:checked").val();
+        insert(selectElement,"#insert_" + id,value)
+    }else{
+        $("#" + id + " input[type='checkbox']").each(function(index,inputValue){
+            var insertZoneName = "#insert_" + id + "_" + $(inputValue).val();
+
+            if($(insertZoneName).length){
+                if($(inputValue).is(":checked") && $(insertZoneName).html() == ''){
+                    insert($(inputValue).val(),insertZoneName,value);
+                }else{
+                    if(!$(inputValue).is(":checked")){
+                        $(insertZoneName).html('');
+                    }
+                }
+            }
+        });
+    }
+
+}
+
+function insert(elementId,idName,parent){
+    var routeId = $(parent).attr("data-route-"+elementId);
 
     if(routeId == null){
-        $("#insert_" + id).html(null);
+        $(idName).html(null);
     }else{
         $.ajax({
-            url: "/get/questions/for/" + selectElement,
+            url: "/get/questions/for/" + elementId,
             dataType: "html",
             success: function(data){
-                $("#insert_" + id).html(data);
-                $("#insert_" + id).find('[data-expensed]').each(function(index,value){
+                $(idName).html(data);
+                $(idName).find('[data-expensed]').each(function(index,value){
                     handler(value);
                 });
             }
         })
     }
-
 }
 
 function handler(value){
     var id = $(value).attr("id");
-    $(value).after("<div id ='insert_" + id + "'></div>");
+    if($(value).attr("data-multiple") != undefined && $(value).attr("data-multiple") != false){
+            $("#" + id + " input[type='checkbox']").each(function(index,inputValue){
+                var reference = $(inputValue).val();
+                if($(value).attr("data-route-" + reference) != undefined){
+                    $(value).parent().after("<div id ='insert_" + id + "_" + reference +"'></div>");
+                }
+            });
+    }else{
+        $(value).parent().after("<div id ='insert_" + id + "'></div>");
+    }
+
     $(value).on("change",function () {
         change(value);
     });

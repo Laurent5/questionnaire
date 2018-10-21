@@ -19,32 +19,19 @@ class QuestionRepository extends ServiceEntityRepository
         parent::__construct($registry, Question::class);
     }
 
-//    /**
-//     * @return Question[] Returns an array of Question objects
-//     */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('q')
-            ->andWhere('q.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('q.id', 'ASC')
-            ->setMaxResults(10)
+    /**
+     * @return mixed
+     */
+    public function getQuestionAvecReponses(){
+        return $this->createQueryBuilder("q")
+            ->select(array("q","rfi","qu"))
+            ->distinct("q")
+            ->innerJoin("q.reponsesFourniesIndividuelles","rfi")
+            ->leftJoin("rfi.questionnaire","qu")
+            ->where("rfi IS NOT NULL")
+            ->orderBy("q.ordre","ASC")
             ->getQuery()
-            ->getResult()
-        ;
+            ->execute()
+            ;
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Question
-    {
-        return $this->createQueryBuilder('q')
-            ->andWhere('q.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

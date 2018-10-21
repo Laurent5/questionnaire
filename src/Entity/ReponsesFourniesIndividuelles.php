@@ -61,4 +61,9 @@ abstract class ReponsesFourniesIndividuelles
         return $this;
     }
 
+    /**
+     * @return null|string
+     */
+    abstract function getValeur() : ?string ;
+
 }

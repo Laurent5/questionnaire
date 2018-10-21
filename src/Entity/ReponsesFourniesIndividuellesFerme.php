@@ -26,4 +26,9 @@ class ReponsesFourniesIndividuellesFerme extends ReponsesFourniesIndividuelles
        $this->reponsesFerme = $reponsesFerme;
        return $this;
    }
+
+   public function getValeur(): ?string
+   {
+       return $this->getReponsesFerme()->getTexte();
+   }
 }

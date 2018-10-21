@@ -18,33 +18,4 @@ class ReponsesFourniesIndividuellesRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, ReponsesFourniesIndividuelles::class);
     }
-
-//    /**
-//     * @return ReponsesFourniesIndividuelles[] Returns an array of ReponsesFourniesIndividuelles objects
-//     */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('r.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?ReponsesFourniesIndividuelles
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

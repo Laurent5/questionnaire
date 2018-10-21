@@ -25,4 +25,5 @@ class ReponsesFourniesIndividuellesOuverte extends ReponsesFourniesIndividuelles
 
         return $this;
     }
+
 }

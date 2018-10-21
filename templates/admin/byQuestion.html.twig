@@ -1,0 +1,28 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block body %}
+    <h1>Réponses fournies - Classement par questions</h1>
+    <br \>
+    {% for question in questions %}
+        <h2>{{ question.ordre }}) {{ question.question }}</h2>
+        <p>{{ question.reponsesFourniesIndividuelles|length }} réponse(s) reçue(s)</p>
+        <br \>
+        <table class="table-responsive table table-hover">
+            <thead>
+            <tr>
+                <th>Réponses</th>
+                <th>Id du Questionnaire</th>
+                <th>Id du répondant</th>
+            </tr>
+            {% for reponse in question.reponsesFourniesIndividuelles %}
+                <tr>
+                    <td>{{ reponse.valeur }}</td>
+                    <td><a href="{{ path('admin_reponses_by_questionnaire', { 'questionnaire' : reponse.questionnaire.id }) }}">{{ reponse.questionnaire.questionnaireId }}</a></td>
+                    <td>{{ reponse.questionnaire.repondantToken }}</td>
+                </tr>
+            {% endfor %}
+            </thead>
+        </table>
+    {% endfor %}
+    <br \>
+{% endblock %}

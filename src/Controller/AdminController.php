@@ -9,12 +9,17 @@
 namespace App\Controller;
 
 
+use App\Entity\Fin;
 use App\Entity\Question;
 use App\Entity\QuestionPrerequis;
+use App\Entity\Reponses;
 use App\Entity\ReponsesFerme;
+use App\Entity\ReponsesFournies;
+use App\Entity\ReponsesFourniesIndividuelles;
 use App\Entity\ReponsesOuverte;
 use App\Entity\Thematique;
 use App\Form\FiltreType;
+use App\Form\FinType;
 use App\Form\QuestionFermeAvecFiltreType;
 use App\Form\QuestionFermeeType;
 use App\Form\QuestionOuverteAvecFiltreType;
@@ -30,6 +35,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Common\Util\ClassUtils;
 
 
 /**
@@ -46,8 +52,53 @@ class AdminController extends Controller
     public function home(){
         return $this->render('admin\home.html.twig',array(
             'thematiques' => $this->getDoctrine()->getRepository(Thematique::class)->findBy(array(),array('ordre'=>'ASC')),
-            'questions' => $this->getDoctrine()->getRepository(Question::class)->findBy(array(),array('ordre'=>'ASC'))
+            'questions' => $this->getDoctrine()->getRepository(Question::class)->findBy(array(),array('ordre'=>'ASC')),
+            'questionnaires' => $this->getDoctrine()->getRepository(ReponsesFournies::class)->findAll(),
+            'fins' => $this->getDoctrine()->getRepository(Fin::class)->findBy(array(),array('ordre'=>'ASC'))
         ));
+    }
+
+    /**
+     * @param Fin $fin
+     * @return Response
+     * @Route("/view/fin/{fin}", name="admin_view_fin", requirements={"fin"="\d+"})
+     */
+    public function viewFin(Fin $fin = null){
+        if($fin !== null) {
+            return $this->render('questionnaire\fin.html.twig', array(
+                'fin' => $fin
+            ));
+        }else{
+            return $this->render('questionnaire\fin_default.html.twig');
+        }
+    }
+
+    /**
+     *@Route("/byQuestion", name="admin_reponses_by_questions")
+     */
+    public function getReponsesByQuestions(){
+        $questions = $this->getDoctrine()->getRepository(Question::class)->getQuestionAvecReponses();
+        return $this->render('admin\byQuestion.html.twig',array(
+            'questions' => $questions
+        ));
+    }
+
+    /**
+     * @Route("/byQuestionnaires", name="admin_reponses_by_questionnaires")
+     * @Route("/byQuestionnaire/{questionnaire}", name="admin_reponses_by_questionnaire", requirements={"questionnaire"="\d+"})
+     * @param ReponsesFournies|null $questionnaire
+     * @return Response
+     */
+    public function getReponsesByQuestionnaire(ReponsesFournies $questionnaire = null){
+        if($questionnaire == null){
+            return $this->render('admin\questionnaires.html.twig',array(
+                'questionnaires' => $this->getDoctrine()->getRepository(ReponsesFournies::class)->findAll()
+            ));
+        }else{
+            return $this->render('admin\questionnaire.html.twig',array(
+                'questionnaire' => $questionnaire
+            ));
+        }
     }
 
 
@@ -122,11 +173,55 @@ class AdminController extends Controller
 
     /**
      * @param Request $request
+     * @param Fin $fin
+     * @Route("/add/fin", name="admin_add_fin")
+     * @Route("/update/fin/{fin}", name="admin_add_fin", requirements={"fin"="\d+"})
+     * @return Response
+     */
+    public function addFin(Request $request, Fin $fin = null){
+        $form = $this->createForm(FinType::class, $fin);
+        $form->add("Valider",SubmitType::class);
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            /** @var Fin $data */
+            $data = $form->getData();
+
+            $manager = $this->getDoctrine()->getManager();
+
+            $manager->persist($data);
+            $manager->flush();
+
+            $this->addFlash("success","La fin est bien enregistrée");
+
+            return $this->redirectToRoute("admin_home");
+        }
+
+        return $this->render('admin\form.html.twig',array(
+            'form' => $form->createView()
+        ));
+    }
+
+    /**
+     * @param Fin $fin
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @Route("/remove/fin/{fin}", name="admin_remove_fin", requirements={"fin"="\d+"})
+     */
+    public function removeFin(Fin $fin){
+        $this->getDoctrine()->getManager()->remove($fin);
+        $this->getDoctrine()->getManager()->flush();
+
+        return $this->redirectToRoute("admin_home");
+    }
+
+    /**
+     * @param Request $request
      * @param Question $question
      * @Route("/question/modifier/{question}", name="admin_modifier_question", requirements={"question"="\d+"} )
      */
     public function updateQuestion(Request $request, Question $question){
-        if($question->getReponses() && get_class($question->getReponses()->first()) == ReponsesFerme::class){
+        if($question->getReponses() && !$question->getReponses()->isEmpty() && ClassUtils::getClass($question->getReponses()->first()) == ReponsesFerme::class){
             if($question->getReponsePreRequise()->count() == 0){
                 return $this->questionFermeeSansFiltre($request,$question);
             }else{
@@ -134,9 +229,10 @@ class AdminController extends Controller
                     return $this->questionFermeeAvecFiltre($request,$question);
                 }else{
                    return $this->sousQuestionFermeeSansFiltre($request,$question);
+
                 }
             }
-        }elseif ($question->getReponses() && get_class($question->getReponses()->first()) == ReponsesOuverte::class) {
+        }elseif ($question->getReponses() && !$question->getReponses()->isEmpty() && ClassUtils::getClass($question->getReponses()->first()) == ReponsesOuverte::class) {
             if ($question->getReponsePreRequise()->count() == 0) {
                 return $this->questionOuverteSansFiltre($request,$question);
             } else {

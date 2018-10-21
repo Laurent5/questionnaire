@@ -19,6 +19,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Doctrine\Common\Util\ClassUtils;
 
 class QuestionnairePartListener implements EventSubscriberInterface
 {
@@ -61,6 +62,7 @@ class QuestionnairePartListener implements EventSubscriberInterface
          * @var Reponses $value
          */
         $reponses = new ReponsesFournies();
+
         foreach ($event->getData() as $key => $value) {
             $this->traitReponse($key,$value,$reponses);
         }
@@ -73,19 +75,34 @@ class QuestionnairePartListener implements EventSubscriberInterface
     }
 
     private function traitReponse($key,$value,ReponsesFournies $reponses){
+        //Si nous avons un problème de valeur, alors il sera traîté à la validation.
+        if(is_array($value) && empty($value)){
+            return;
+        }
+
         /** @var Question $question */
         $question = $this->manager->getRepository(Question::class)->find($key);
 
-        if(get_class($question->getReponses()->first()) == ReponsesFerme::class){
-            /** @var ReponsesFerme $reponse */
-            $reponse = $this->manager->getRepository(ReponsesFerme::class)->find($value);
-            $reponseFournie = new ReponsesFourniesIndividuellesFerme();
-            $reponseFournie->setReponsesFerme($reponse)->setQuestions($question);
-            $reponses->addReponse($reponseFournie);
+        if(ClassUtils::getClass($question->getReponses()->first()) == ReponsesFerme::class){
+            if(is_array($value)){
+                foreach($value as $valueCount){
+                    $this->setReponseFermeResponse($reponses,$question,$valueCount);
+                }
+            }else{
+                $this->setReponseFermeResponse($reponses,$question,$value);
+            }
         }else{
             $reponseFournie = new ReponsesFourniesIndividuellesOuverte();
             $reponseFournie->setValeur($value)->setQuestions($question);
             $reponses->addReponse($reponseFournie);
         }
+    }
+
+    private function setReponseFermeResponse(ReponsesFournies $reponses, Question $question, $value){
+        /** @var ReponsesFerme $reponse */
+        $reponse = $this->manager->getRepository(ReponsesFerme::class)->find($value);
+        $reponseFournie = new ReponsesFourniesIndividuellesFerme();
+        $reponseFournie->setReponsesFerme($reponse)->setQuestions($question);
+        $reponses->addReponse($reponseFournie);
     }
 }
