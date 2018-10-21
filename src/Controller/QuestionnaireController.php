@@ -135,12 +135,10 @@ class QuestionnaireController extends Controller {
         if(!$session->isStarted()){
             $session->start();
         }
-        dump($session->get('questionnaire_id',false));
         /** @var ReponsesFournies $questionnaire */
         $questionnaire = $this->getDoctrine()->getRepository(ReponsesFournies::class)->find(
             $session->get('questionnaire_id',false)
         );
-        dump($questionnaire);
         return new Response($this->renderView('questionnaire/ajax_field_render.html.twig',array(
             'form' => $factory->createFormFromReponse($reponse,$questionnaire)->createView()
         )));
