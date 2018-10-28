@@ -50,6 +50,9 @@ class QuestionnaireController extends Controller {
             $thematique = $this->getDoctrine()->getRepository(Thematique::class)->findOneByOrdre($session->get('last_ok')+1);
 
             if($thematique === null){
+                $session->remove('last_ok');
+                $session->remove('questionnaire_id');
+                
                 //On est alors à la fin du questionnaire
                 return $this->getFin($questionnaire);
             }
