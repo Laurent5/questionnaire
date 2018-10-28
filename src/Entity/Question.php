@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -15,6 +16,14 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 class Question
 {
+
+    public const QUESTION_REPONSE_OUVERTE_SANS_FILTRE = "qrosf";
+    public const QUESTION_REPONSE_OUVERTE_AVEC_FILTRE = "qroaf";
+    public const QUESTION_REPONSE_FERME_SANS_FILTRE = "qrfsf";
+    public const QUESTION_REPONSE_FERME_AVEC_FILTRE = "qrfav";
+    public const SOUS_QUESTION_REPONSE_FERME = "sqrf";
+    public const SOUS_QUESTION_REPONSE_OUVERTE = "sqro";
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -246,6 +255,51 @@ class Question
         }
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypeOfQuestion(){
+
+        // Il s'aggit d'une question avec réponses fermées
+        if($this->getReponses() && !$this->getReponses()->isEmpty() && ClassUtils::getClass($this->getReponses()->first()) == ReponsesFerme::class){
+            if($this->getReponsePreRequise()->count() == 0){
+                return self::QUESTION_REPONSE_FERME_SANS_FILTRE;
+            }else{
+                if($question->getReponsePreRequise()->count() > 1){
+                    return self::QUESTION_REPONSE_FERME_AVEC_FILTRE;
+                }else{
+                    /** @var QuestionPrerequis $questionPR */
+                    $questionPR = $this->getReponsePreRequise()->first();
+                    if($questionPR->getQuestion()->getThematique()->getId() == $this->getThematique()->getId()){
+                        return self::SOUS_QUESTION_REPONSE_FERME;
+                    }else{
+                        return self::QUESTION_REPONSE_FERME_AVEC_FILTRE;
+                    }
+                }
+            }
+        }
+        //Il s'aggit d'une question avec réponse ouverte
+        elseif ($this->getReponses() && !$this->getReponses()->isEmpty() && ClassUtils::getClass($this->getReponses()->first()) == ReponsesOuverte::class) {
+            if ($this->getReponsePreRequise()->count() == 0) {
+                return self::QUESTION_REPONSE_OUVERTE_SANS_FILTRE;
+            } else {
+                if ($this->getReponsePreRequise()->count() > 1) {
+                    return self::QUESTION_REPONSE_OUVERTE_AVEC_FILTRE;
+                } else {
+                    /** @var QuestionPrerequis $questionPR */
+                    $questionPR = $this->getReponsePreRequise()->first();
+                    if($questionPR->getQuestion()->getThematique()->getId() == $this->getThematique()->getId()){
+                        return self::SOUS_QUESTION_REPONSE_OUVERTE;
+                    }else{
+                        return self::QUESTION_REPONSE_OUVERTE_AVEC_FILTRE;
+                    }
+                }
+            }
+        }
+
+        throw new LogicException();
     }
     
 }

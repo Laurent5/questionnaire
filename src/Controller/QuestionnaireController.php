@@ -102,7 +102,8 @@ class QuestionnaireController extends Controller {
         }
 
         return $this->render('questionnaire/home.html.twig',array(
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'thematique' => $thematique
         ));
 
     }

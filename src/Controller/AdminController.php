@@ -221,30 +221,15 @@ class AdminController extends Controller
      * @Route("/question/modifier/{question}", name="admin_modifier_question", requirements={"question"="\d+"} )
      */
     public function updateQuestion(Request $request, Question $question){
-        if($question->getReponses() && !$question->getReponses()->isEmpty() && ClassUtils::getClass($question->getReponses()->first()) == ReponsesFerme::class){
-            if($question->getReponsePreRequise()->count() == 0){
-                return $this->questionFermeeSansFiltre($request,$question);
-            }else{
-                if($question->getReponsePreRequise()->count() > 1){
-                    return $this->questionFermeeAvecFiltre($request,$question);
-                }else{
-                   return $this->sousQuestionFermeeSansFiltre($request,$question);
 
-                }
-            }
-        }elseif ($question->getReponses() && !$question->getReponses()->isEmpty() && ClassUtils::getClass($question->getReponses()->first()) == ReponsesOuverte::class) {
-            if ($question->getReponsePreRequise()->count() == 0) {
-                return $this->questionOuverteSansFiltre($request,$question);
-            } else {
-                if ($question->getReponsePreRequise()->count() > 1) {
-                    return $this->questionOuverteAvecFiltre($request,$question);
-                } else {
-                    return $this->sousQuestionOuverteSansFiltre($request,$question);
-                }
-            }
+        switch ($question->getTypeOfQuestion()){
+            case Question::QUESTION_REPONSE_OUVERTE_AVEC_FILTRE : return $this->questionOuverteAvecFiltre($request,$question);
+            case Question::QUESTION_REPONSE_OUVERTE_SANS_FILTRE : return $this->questionOuverteSansFiltre($request,$question);
+            case Question::QUESTION_REPONSE_FERME_AVEC_FILTRE : return $this->questionFermeeAvecFiltre($request,$question);
+            case Question::SOUS_QUESTION_REPONSE_FERME: return $this->sousQuestionFermeeSansFiltre($request,$question);
+            case Question::SOUS_QUESTION_REPONSE_OUVERTE: return $this->sousQuestionOuverteSansFiltre($request,$question);
+            case Question::QUESTION_REPONSE_FERME_SANS_FILTRE : return $this->questionFermeeSansFiltre($request,$question);
         }
-
-        throw new LogicException();
     }
 
     /**

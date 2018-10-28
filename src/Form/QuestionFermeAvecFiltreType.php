@@ -36,8 +36,8 @@ class QuestionFermeAvecFiltreType extends QuestionAbstractType
                 'allow_delete' => true,
                 'by_reference' => false,
                 'constraints' => array(new NotBlank(), new NotNull(), new Count(array(
-                    'min' => 2,
-                    'minMessage' => "Une réponse avec filtre, doit contenir au moins 2 filtres"
+                    'min' => 1,
+                    'minMessage' => "Une réponse avec filtre, doit contenir au moins 1 filtre"
                 )))
             ))
         ;

@@ -13,6 +13,9 @@ class ThematiqueType extends AbstractType
     {
         $builder
             ->add('nom')
+            ->add('description',null,array(
+                'label' => 'Introduction de la section'
+            ))
             ->add('ordre')
         ;
     }
