@@ -92,6 +92,12 @@ class FormQuestionnaireFactory
 
     private function orderAndFilter(PersistentCollection $questions, ReponsesFournies $questionnaire = null)
     {
+
+        $questions = $questions->toArray();
+        usort($questions, array(Question::class, "order"));
+        $questions = new ArrayCollection($questions);
+        $oldKey = -1;
+
         /** @var Question $question */
         foreach ($questions as $key => $question) {
             if ($question instanceof Question && $question->getOrdre() === null) {
@@ -103,10 +109,13 @@ class FormQuestionnaireFactory
                 $questions->remove($key);
 
             }
-        }
 
-        $questions = $questions->toArray();
-        usort($questions, array(Question::class, "order"));
+            if($oldKey == $question->getOrdre()){
+                $questions->remove($key);
+            }
+
+            $oldKey = $question->getOrdre();
+        }
 
         return $questions;
     }
@@ -139,12 +148,25 @@ class FormQuestionnaireFactory
                 $values = array();
                 $addRoute = [];
                 $expensed = false;
+
                 /** @var ReponsesFerme $reponse */
                 foreach ($question->getReponses() as $reponse) {
                     $values[$reponse->getTexte()] = $reponse->getId();
                     if ($reponse->getQuestions()->count() > 0) {
-                        $addRoute["data-route-" . $reponse->getId()] = true;
-                        $expensed = true;
+                        $affiche = false;
+                        /** @var QuestionPrerequis $questionInduite */
+                        foreach ($reponse->getQuestions() as $questionInduite){
+                            if($questionInduite->getQuestion()->getThematique()->getId() == $question->getThematique()->getId()){
+                                $affiche = true;
+                                break;
+                            }
+                        }
+
+                        if($affiche){
+                            $addRoute["data-route-" . $reponse->getId()] = true;
+                            $expensed = true;
+                        }
+
                     }
                 }
                 $addRoute["data-expensed"] = $expensed;
@@ -228,7 +250,7 @@ class FormQuestionnaireFactory
 
         /** @var QuestionPrerequis $question */
         foreach ($reponse->getQuestions() as $question){
-            if ($this->preRequisOk($question->getQuestion(),$questionnaireModifie)) {
+            if ($this->preRequisOk($question->getQuestion(),$questionnaireModifie) && $question->getQuestion()->getThematique()->getId() == $reponse->getQuestion()->getThematique()->getId()) {
                 $form = $this->createFormFromQuestion($question->getQuestion(), $form);
             }
         }

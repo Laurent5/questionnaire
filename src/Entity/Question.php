@@ -267,7 +267,7 @@ class Question
             if($this->getReponsePreRequise()->count() == 0){
                 return self::QUESTION_REPONSE_FERME_SANS_FILTRE;
             }else{
-                if($question->getReponsePreRequise()->count() > 1){
+                if($this->getReponsePreRequise()->count() > 1){
                     return self::QUESTION_REPONSE_FERME_AVEC_FILTRE;
                 }else{
                     /** @var QuestionPrerequis $questionPR */

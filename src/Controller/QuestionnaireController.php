@@ -52,7 +52,7 @@ class QuestionnaireController extends Controller {
             if($thematique === null){
                 $session->remove('last_ok');
                 $session->remove('questionnaire_id');
-                
+
                 //On est alors à la fin du questionnaire
                 return $this->getFin($questionnaire);
             }
