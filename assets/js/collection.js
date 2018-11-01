@@ -35,7 +35,6 @@ function selectedDoIt(){
                         {
                             reponse.val(oldSelected);
                         }
-
                     }
                 });
             }else{

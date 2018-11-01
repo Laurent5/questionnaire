@@ -29,6 +29,7 @@ function insert(elementId,idName,parent){
     if(routeId == null){
         $(idName).html(null);
     }else{
+        $("#form_Suivant").attr("disabled", "disabled").html("Le questionnaire s'adapte, merci de patienter ...");
         $.ajax({
             url: "/get/questions/for/" + elementId,
             dataType: "html",
@@ -37,6 +38,7 @@ function insert(elementId,idName,parent){
                 $(idName).find('[data-expensed]').each(function(index,value){
                     handler(value);
                 });
+                $("#form_Suivant").removeAttr("disabled").html("Suivant");
             }
         })
     }

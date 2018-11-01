@@ -30,6 +30,14 @@ class QuestionnaireController extends Controller {
     }
 
     /**
+     * @return Response
+     * @Route("/contact", name="contact")
+     */
+    public function contact(){
+        return $this->render('questionnaire\contact.html.twig');
+    }
+
+    /**
      * @param Request $request
      * @Route("/", name="home")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
