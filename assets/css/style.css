@@ -773,6 +773,7 @@ div.art-header-jpeg
   background-image: url('../images/layout/header.jpg');
   background-repeat: no-repeat;
   background-position: center center;
+  background-size: cover;
 }
 /* end Header */
 
