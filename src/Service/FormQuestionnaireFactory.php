@@ -210,6 +210,7 @@ class FormQuestionnaireFactory
                         break;
                     case 'Texte' :
                         $formType = TextareaType::class;
+                        $optionArray['required'] = $reponse->getObligatoire();
                         if ($reponse->getObligatoire()) {
                             $optionArray['constraints'] = array(
                                 new NotBlank(),
@@ -229,7 +230,6 @@ class FormQuestionnaireFactory
             default:
                 Throw new \LogicException("Ce type de réponse n'est pas pris en charge : " . ClassUtils::getClass($reponse));
         }
-
         $form->add($question->getId(), $formType, $optionArray);
 
         return $form;

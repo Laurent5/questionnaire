@@ -131,9 +131,11 @@ class QuestionnaireController extends Controller {
 
 
     /**
-     * @param Question $question
-     * @Route("/get/questions/for/{reponse}", name="ajax_get_question", requirements = { "reponse" : "\d+" }, condition="request.isXmlHttpRequest()" )
+     * @param ReponsesFerme $reponse
+     * @param FormQuestionnaireFactory $factory
+     * @param Session $session
      * @return Response
+     * @Route("/get/questions/for/{reponse}", name="ajax_get_question", requirements = { "reponse" : "\d+" }, condition="request.isXmlHttpRequest()" )
      */
     public function ajaxGetQuestion(ReponsesFerme $reponse, FormQuestionnaireFactory $factory, Session $session){
 
@@ -142,9 +144,9 @@ class QuestionnaireController extends Controller {
         }
 
         /** @var ReponsesFournies $questionnaire */
-        $questionnaire = $this->getDoctrine()->getRepository(ReponsesFournies::class)->find(
-            $session->get('questionnaire_id',false)
-        );
+        $questionnaire = $this->getDoctrine()->getRepository(ReponsesFournies::class)->findOneBy(array(
+            'questionnaire_id' => $session->get('questionnaire_id',false)
+        ));
 
         return new Response($this->renderView('questionnaire/ajax_field_render.html.twig',array(
             'form' => $factory->createFormFromReponse($reponse,$questionnaire)->createView()
