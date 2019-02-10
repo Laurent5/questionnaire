@@ -77,21 +77,21 @@ class Categorisation
         return $this->reponsesFournies;
     }
 
-    public function addReponsesFourny(ReponsesFourniesIndividuellesOuvertes $reponsesFourny): self
+    public function addReponsesFournies(ReponsesFourniesIndividuellesOuvertes $reponsesFournies): self
     {
-        if (!$this->reponsesFournies->contains($reponsesFourny)) {
-            $this->reponsesFournies[] = $reponsesFourny;
-            $reponsesFourny->addCategory($this);
+        if (!$this->reponsesFournies->contains($reponsesFournies)) {
+            $this->reponsesFournies[] = $reponsesFournies;
+            $reponsesFournies->addCategory($this);
         }
 
         return $this;
     }
 
-    public function removeReponsesFourny(ReponsesFourniesIndividuellesOuvertes $reponsesFourny): self
+    public function removeReponsesFournies(ReponsesFourniesIndividuellesOuvertes $reponsesFournies): self
     {
-        if ($this->reponsesFournies->contains($reponsesFourny)) {
-            $this->reponsesFournies->removeElement($reponsesFourny);
-            $reponsesFourny->removeCategory($this);
+        if ($this->reponsesFournies->contains($reponsesFournies)) {
+            $this->reponsesFournies->removeElement($reponsesFournies);
+            $reponsesFournies->removeCategory($this);
         }
 
         return $this;
