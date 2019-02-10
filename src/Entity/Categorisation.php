@@ -70,14 +70,14 @@ class Categorisation
     }
 
     /**
-     * @return Collection|ReponsesFourniesIndividuellesOuvertes[]
+     * @return Collection|ReponsesFourniesIndividuellesOuverte[]
      */
     public function getReponsesFournies(): Collection
     {
         return $this->reponsesFournies;
     }
 
-    public function addReponsesFournies(ReponsesFourniesIndividuellesOuvertes $reponsesFournies): self
+    public function addReponsesFournies(ReponsesFourniesIndividuellesOuverte $reponsesFournies): self
     {
         if (!$this->reponsesFournies->contains($reponsesFournies)) {
             $this->reponsesFournies[] = $reponsesFournies;
@@ -87,7 +87,7 @@ class Categorisation
         return $this;
     }
 
-    public function removeReponsesFournies(ReponsesFourniesIndividuellesOuvertes $reponsesFournies): self
+    public function removeReponsesFournies(ReponsesFourniesIndividuellesOuverte $reponsesFournies): self
     {
         if ($this->reponsesFournies->contains($reponsesFournies)) {
             $this->reponsesFournies->removeElement($reponsesFournies);
