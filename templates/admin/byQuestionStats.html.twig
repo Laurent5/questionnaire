@@ -1,0 +1,59 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block body %}
+    <h1>Réponses fournies - Classement par questions</h1>
+    <br \>
+    {% for question in questions %}
+        <h2>{{ question.ordre }}) {{ question.question }}</h2>
+        {% set nbOccurance = question.reponsesFourniesIndividuelles|length %}
+        <p>{{ nbOccurance }} réponse(s) reçue(s)</p>
+        {% if (question.typeOfQuestion == constant('App\\Entity\\Question::QUESTION_REPONSE_OUVERTE_SANS_FILTRE') or question.typeOfQuestion == constant('App\\Entity\\Question::QUESTION_REPONSE_OUVERTE_AVEC_FILTRE') or question.typeOfQuestion == constant('App\\Entity\\Question::SOUS_QUESTION_REPONSE_OUVERTE')) %}
+            {% if question.categories|length == 0  %}
+                <p><a href="{{ path("admin_add_categorisation", { 'question' : question.id }) }}"><span class="label label-danger">Il n'y a pas de catégorisation</span></a></p>
+                <br>
+            {% else %}
+                <table class="table-responsive table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Catégorie</th>
+                        <th>Nombre d'occurences</th>
+                        <th>Pourcentage</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for categorie in question.categories %}
+                        <tr>
+                            <td>{{ categorie.categorie }}</td>
+                            <td>{{ categorie.reponsesFournies|length }}</a></td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <p><a href="{{ path("admin_add_categorisation", { 'question' : question.id }) }}"><span class="label label-success"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Ajouter une catégorie</span></a></p>
+                <br>
+            {% endif %}
+        {% else %}
+            <table class="table-responsive table table-hover">
+                <thead>
+                <tr>
+                    <th>Réponses</th>
+                    <th>Nombre d'occurences</th>
+                    <th>Pourcentage</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for reponse in question.reponses %}
+
+                    <tr>
+                        <td>{{ reponse.texte }}</td>
+                        <td>{{ reponse.reponsesFournies|length }}</a></td>
+                        <td>{{ ((reponse.reponsesFournies|length*100)/(nbOccurance))|round(2) }} %</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    {% endfor %}
+    <br \>
+{% endblock %}

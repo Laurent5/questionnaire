@@ -11,7 +11,7 @@ class ReponsesFourniesIndividuellesFerme extends ReponsesFourniesIndividuelles
 {
     /**
      * @var ReponsesFerme
-     * @ORM\ManyToOne(targetEntity="ReponsesFerme", cascade={"remove"})
+     * @ORM\ManyToOne(targetEntity="ReponsesFerme", cascade={"remove"}, inversedBy="reponsesFournies")
      */
    private $reponsesFerme;
 

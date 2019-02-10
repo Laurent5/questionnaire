@@ -29,10 +29,18 @@ class ReponsesFerme extends Reponses
     private $texte;
 
 
+    /**
+     * @var ReponsesFerme
+     * @ORM\OneToMany(targetEntity="ReponsesFourniesIndividuellesFerme", mappedBy="reponsesFerme")
+     */
+    private $reponsesFournies;
+
+
 
     public function __construct()
     {
         $this->questions = new ArrayCollection();
+        $this->reponsesFournies = new ArrayCollection();
     }
 
 
@@ -88,6 +96,37 @@ class ReponsesFerme extends Reponses
     public function setTexte(string $texte): self
     {
         $this->texte = $texte;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|ReponsesFourniesIndividuellesFerme[]
+     */
+    public function getReponsesFournies(): Collection
+    {
+        return $this->reponsesFournies;
+    }
+
+    public function addReponsesFourny(ReponsesFourniesIndividuellesFerme $reponsesFourny): self
+    {
+        if (!$this->reponsesFournies->contains($reponsesFourny)) {
+            $this->reponsesFournies[] = $reponsesFourny;
+            $reponsesFourny->setReponsesFerme($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReponsesFourny(ReponsesFourniesIndividuellesFerme $reponsesFourny): self
+    {
+        if ($this->reponsesFournies->contains($reponsesFourny)) {
+            $this->reponsesFournies->removeElement($reponsesFourny);
+            // set the owning side to null (unless already changed)
+            if ($reponsesFourny->getReponsesFerme() === $this) {
+                $reponsesFourny->setReponsesFerme(null);
+            }
+        }
 
         return $this;
     }

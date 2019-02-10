@@ -47,4 +47,16 @@ class ReponsesFourniesIndividuellesOuverteRepository extends ServiceEntityReposi
         ;
     }
     */
+
+    public function getReponseWithoutCategories(){
+        return $this->createQueryBuilder("q")
+            ->leftJoin('q.categories','c')
+            ->leftJoin('q.questions','qq')
+            ->leftJoin('qq.categories','cat')
+            ->where('c IS NULL')
+            ->andWhere('cat IS NOT NULL')
+            ->getQuery()
+            ->execute()
+            ;
+    }
 }

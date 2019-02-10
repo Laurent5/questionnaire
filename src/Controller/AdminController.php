@@ -17,9 +17,11 @@ use App\Entity\Reponses;
 use App\Entity\ReponsesFerme;
 use App\Entity\ReponsesFournies;
 use App\Entity\ReponsesFourniesIndividuelles;
+use App\Entity\ReponsesFourniesIndividuellesOuverte;
 use App\Entity\ReponsesOuverte;
 use App\Entity\Thematique;
 use App\Form\CategorisationFormType;
+use App\Form\CategorisationType;
 use App\Form\FiltreType;
 use App\Form\FinType;
 use App\Form\QuestionFermeAvecFiltreType;
@@ -30,6 +32,7 @@ use App\Form\SousQuestionFermeType;
 use App\Form\SousQuestionOuverteType;
 use App\Form\ThematiqueType;
 use App\Service\FormQuestionnaireFactory;
+use Doctrine\Common\Collections\ArrayCollection;
 use function Sodium\add;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Exception\LogicException;
@@ -146,6 +149,49 @@ class AdminController extends Controller
         $questions = $this->getDoctrine()->getRepository(Question::class)->getQuestionAvecReponses();
         return $this->render('admin\byQuestion.html.twig',array(
             'questions' => $questions
+        ));
+    }
+
+    /**
+     *@Route("/byQuestionStats", name="admin_reponses_by_questions_stats")
+     */
+    public function getReponsesByQuestionsStats(){
+        $questions = $this->getDoctrine()->getRepository(Question::class)->getQuestionAvecReponsesStats();
+        return $this->render('admin\byQuestionStats.html.twig',array(
+            'questions' => $questions
+        ));
+    }
+
+    /**
+     * @Route("/categorise",name="admin_categorise")
+     */
+    public function categoriseReponse(Request $request){
+
+        /** @var null|array $question */
+        $reponse = $this->getDoctrine()->getRepository(ReponsesFourniesIndividuellesOuverte::class)->getReponseWithoutCategories();
+
+        if($reponse !== null) {
+            $reponse = $reponse[0];
+            $form = $this->createForm(CategorisationType::class,$reponse);
+            $form->add("Classifier !",SubmitType::class);
+            $form->handleRequest($request);
+
+            if($form->isSubmitted() && $form->isValid()){
+
+                /** @var ReponsesFourniesIndividuellesOuverte $data */
+                $data = $form->getData();
+
+                $this->getDoctrine()->getManager()->persist($data);
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute("admin_categorise");
+            }
+
+        }
+
+        return $this->render('admin\categorisation.html.twig',array(
+            'reponse' => $reponse,
+            'form' => $form->createView()
         ));
     }
 

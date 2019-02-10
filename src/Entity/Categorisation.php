@@ -96,4 +96,24 @@ class Categorisation
 
         return $this;
     }
+
+    public function addReponsesFourny(ReponsesFourniesIndividuellesOuverte $reponsesFourny): self
+    {
+        if (!$this->reponsesFournies->contains($reponsesFourny)) {
+            $this->reponsesFournies[] = $reponsesFourny;
+            $reponsesFourny->addCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReponsesFourny(ReponsesFourniesIndividuellesOuverte $reponsesFourny): self
+    {
+        if ($this->reponsesFournies->contains($reponsesFourny)) {
+            $this->reponsesFournies->removeElement($reponsesFourny);
+            $reponsesFourny->removeCategory($this);
+        }
+
+        return $this;
+    }
 }

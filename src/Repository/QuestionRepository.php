@@ -24,9 +24,28 @@ class QuestionRepository extends ServiceEntityRepository
      */
     public function getQuestionAvecReponses(){
         return $this->createQueryBuilder("q")
-            ->select(array("q","rfi","qu"))
+            ->select(array("q","rfi","qu","r"))
             ->distinct("q")
             ->innerJoin("q.reponsesFourniesIndividuelles","rfi")
+            ->leftJoin("q.reponses","r")
+            ->leftJoin("rfi.questionnaire","qu")
+            ->where("rfi IS NOT NULL")
+            ->orderBy("q.ordre","ASC")
+            ->getQuery()
+            ->execute()
+            ;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getQuestionAvecReponsesStats(){
+        return $this->createQueryBuilder("q")
+            ->select(array("q","rfi","qu","r"))
+            ->distinct("q")
+            ->innerJoin("q.reponsesFourniesIndividuelles","rfi")
+            ->leftJoin("q.reponses","r")
             ->leftJoin("rfi.questionnaire","qu")
             ->where("rfi IS NOT NULL")
             ->orderBy("q.ordre","ASC")
