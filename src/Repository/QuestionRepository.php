@@ -34,4 +34,16 @@ class QuestionRepository extends ServiceEntityRepository
             ->execute()
             ;
     }
+
+    public function getQuestions(){
+        return $this->createQueryBuilder("q")
+            ->select(array("q","rpr","c","r"))
+            ->leftJoin("q.reponses","r")
+            ->leftJoin("q.reponsePreRequise","rpr")
+            ->leftJoin("q.categories","c")
+            ->orderBy("q.ordre",'ASC')
+            ->getQuery()
+            ->execute()
+            ;
+    }
 }

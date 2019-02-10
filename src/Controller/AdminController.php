@@ -9,6 +9,7 @@
 namespace App\Controller;
 
 
+use App\Entity\Categorisation;
 use App\Entity\Fin;
 use App\Entity\Question;
 use App\Entity\QuestionPrerequis;
@@ -18,6 +19,7 @@ use App\Entity\ReponsesFournies;
 use App\Entity\ReponsesFourniesIndividuelles;
 use App\Entity\ReponsesOuverte;
 use App\Entity\Thematique;
+use App\Form\CategorisationFormType;
 use App\Form\FiltreType;
 use App\Form\FinType;
 use App\Form\QuestionFermeAvecFiltreType;
@@ -52,9 +54,73 @@ class AdminController extends Controller
     public function home(){
         return $this->render('admin\home.html.twig',array(
             'thematiques' => $this->getDoctrine()->getRepository(Thematique::class)->findBy(array(),array('ordre'=>'ASC')),
-            'questions' => $this->getDoctrine()->getRepository(Question::class)->findBy(array(),array('ordre'=>'ASC')),
+            'questions' => $this->getDoctrine()->getRepository(Question::class)->getQuestions(),
             'questionnaires' => $this->getDoctrine()->getRepository(ReponsesFournies::class)->findAll(),
             'fins' => $this->getDoctrine()->getRepository(Fin::class)->findBy(array(),array('ordre'=>'ASC'))
+        ));
+    }
+
+    /**
+     * @param Request $request
+     * @param Question $question
+     * @param Categorisation|null $categorisation
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @Route("/question/{question}/add/categorisation", name="admin_add_categorisation", requirements={"question"="\d+"})
+     * @Route("/question/{question}/categorisation/{categorisation}/update", name="admin_update_categorisation", requirements={"question"="\d+","categorisation"="\d+"})
+     */
+    public function categorisationManagement(Request $request, Question $question, Categorisation $categorisation = null){
+
+        if($request->get("_route") == "admin_add_categorisation"){
+            $categorisation = null;
+        }
+
+        $form = $this->createForm(CategorisationFormType::class, $categorisation);
+        $form->add(($categorisation===null ? "Ajouter" : "Modifier"),SubmitType::class);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            /** @var Categorisation $categorisationNew */
+            $categorisationNew = $form->getData();
+
+            $categorisationNew->setQuestion($question);
+            $question->addCategory($categorisationNew);
+
+            $manager = $this->getDoctrine()->getManager();
+
+            $manager->persist($categorisationNew);
+            $manager->persist($question);
+            $manager->flush();
+
+            $this->addFlash("success","Opération réalisée avec succès !");
+
+            return $this->redirectToRoute("admin_add_categorisation",array(
+                'question' => $question->getId()
+            ));
+        }
+
+        return $this->render('admin\categorisation_management.html.twig',array(
+            'question' => $question,
+            'form' => $form->createView()
+        ));
+
+    }
+
+    /**
+     * @param Categorisation $categorisation
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @Route("/categorisation/delete/{categorisation}", name="admin_delete_categorisation", requirements={"categorisation"="\d+"})
+     */
+    public function removeCategorie(Categorisation $categorisation){
+        if($categorisation->getReponsesFournies()->count() > 0){
+            $this->addFlash("error", "Impossible de supprimer cette catégorie car il y a des réponses qui y sont affectuées");
+        }else{
+            $this->getDoctrine()->getManager()->remove($categorisation);
+            $this->getDoctrine()->getManager()->flush();
+            $this->addFlash("success","La catégorie a bien été supprimée");
+        }
+
+        return $this->redirectToRoute("admin_add_categorisation",array(
+            'question' => $categorisation->getQuestion()->getId()
         ));
     }
 

@@ -74,12 +74,19 @@ class Question
      */
     private $aide;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="Categorisation", mappedBy="question")
+     */
+    private $categories;
+
 
     public function __construct()
     {
         $this->reponses = new ArrayCollection();
         $this->reponsePreRequise = new ArrayCollection();
         $this->reponsesFourniesIndividuelles = new ArrayCollection();
+        $this->categories = new ArrayCollection();
     }
 
     public function getId()
@@ -300,6 +307,37 @@ class Question
         }
 
         throw new LogicException();
+    }
+
+    /**
+     * @return Collection|Categorisation[]
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Categorisation $category): self
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories[] = $category;
+            $category->setQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Categorisation $category): self
+    {
+        if ($this->categories->contains($category)) {
+            $this->categories->removeElement($category);
+            // set the owning side to null (unless already changed)
+            if ($category->getQuestion() === $this) {
+                $category->setQuestion(null);
+            }
+        }
+
+        return $this;
     }
     
 }

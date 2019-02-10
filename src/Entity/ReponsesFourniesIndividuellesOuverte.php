@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -14,6 +16,17 @@ class ReponsesFourniesIndividuellesOuverte extends ReponsesFourniesIndividuelles
      */
     private $valeur;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\ManyToMany(targetEntity="Categorisation", inversedBy="reponsesFournies")
+     */
+    private $categories;
+
+    public function __construct()
+    {
+        $this->categories = new ArrayCollection();
+    }
+
     public function getValeur(): ?string
     {
         return $this->valeur;
@@ -25,5 +38,33 @@ class ReponsesFourniesIndividuellesOuverte extends ReponsesFourniesIndividuelles
 
         return $this;
     }
+
+    /**
+     * @return Collection|Categorisation[]
+     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Categorisation $category): self
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories[] = $category;
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Categorisation $category): self
+    {
+        if ($this->categories->contains($category)) {
+            $this->categories->removeElement($category);
+        }
+
+        return $this;
+    }
+
+
 
 }
