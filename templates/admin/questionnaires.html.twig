@@ -2,10 +2,29 @@
 
 {% block body %}
     <h1>Selection des formulaires</h1>
-    <ul>
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th>Id du questionnaire</th>
+            <th>Nombre de question reçues</th>
+            <th>Prendre en compte dans l'analyse ?</th>
+        </tr>
+        </thead>
+        <tbody>
         {% for questionnaire in questionnaires %}
-            <li><a href="{{ path('admin_reponses_by_questionnaire', { 'questionnaire' : questionnaire.id }) }}">{{ questionnaire.questionnaireId }}</a> - {{ questionnaire.reponses|length }} réponses reçues</li>
+            <tr>
+                <td><a href="{{ path('admin_reponses_by_questionnaire', { 'questionnaire' : questionnaire.id }) }}">{{ questionnaire.questionnaireId }}</a></td>
+                <td>{{ questionnaire.reponses|length }} réponses reçues</td>
+                <td><a href="{{ path('admin_change_joindre_a_l_analyse_redirect', { 'questionnaire' : questionnaire.id, 'routeName' : app.request.get('_route')  }) }}">
+                    {% if questionnaire.joindreALAnalyse %}
+                        <span class="label label-success">Oui</span>
+                    {% else %}
+                        <span class="label label-danger">Non</span>
+                    {% endif %}
+                    </a>
+                </td>
+            </tr>
         {% endfor %}
-    </ul>
-
+        </tbody>
+    </table>
 {% endblock %}

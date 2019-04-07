@@ -21,6 +21,13 @@
         </ul>
     </div>
     <div class="col-sm-9">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
         {% block body %}{% endblock %}
         {% block javascripts %}
             <script src="{{ asset('build/app.js') }}"></script>

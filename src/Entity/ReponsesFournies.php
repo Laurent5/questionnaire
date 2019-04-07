@@ -40,6 +40,11 @@ class ReponsesFournies
      */
     private $created_at;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $joindreALAnalyse;
+
     public function __construct()
     {
         $this->reponses = new ArrayCollection();
@@ -125,6 +130,22 @@ class ReponsesFournies
             $this->setCreatedAt(new \DateTime());
         }
 
+        if(null==$this->getJoindreALAnalyse()){
+            $this->setJoindreALAnalyse(true);
+        }
+
         $this->setQuestionnaireId(uniqid());
+    }
+
+    public function getJoindreALAnalyse(): ?bool
+    {
+        return $this->joindreALAnalyse;
+    }
+
+    public function setJoindreALAnalyse(bool $joindreALAnalyse): self
+    {
+        $this->joindreALAnalyse = $joindreALAnalyse;
+
+        return $this;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -74,7 +75,16 @@ class Categorisation
      */
     public function getReponsesFournies(): Collection
     {
-        return $this->reponsesFournies;
+        $retour = new ArrayCollection();
+
+        /** @var ReponsesFourniesIndividuellesOuverte $rfi */
+        foreach ($this->reponsesFournies as $rfi){
+            if($rfi->getQuestionnaire()->getJoindreALAnalyse()){
+                $retour->add($rfi);
+            }
+        }
+
+        return $retour;
     }
 
     public function addReponsesFournies(ReponsesFourniesIndividuellesOuverte $reponsesFournies): self

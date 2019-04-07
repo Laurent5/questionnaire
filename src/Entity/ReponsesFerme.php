@@ -105,7 +105,16 @@ class ReponsesFerme extends Reponses
      */
     public function getReponsesFournies(): Collection
     {
-        return $this->reponsesFournies;
+        $retour = new ArrayCollection();
+
+        /** @var ReponsesFourniesIndividuellesFerme $rfi */
+        foreach ($this->reponsesFournies as $rfi){
+            if($rfi->getQuestionnaire()->getJoindreALAnalyse()){
+                $retour->add($rfi);
+            }
+        }
+
+        return $retour;
     }
 
     public function addReponsesFourny(ReponsesFourniesIndividuellesFerme $reponsesFourny): self

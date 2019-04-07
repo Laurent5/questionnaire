@@ -6,7 +6,7 @@
     {% for question in questions %}
         <h2>{{ question.ordre }}) {{ question.question }}</h2>
         {% set nbOccurance = question.reponsesFourniesIndividuelles|length %}
-        <p>{{ nbOccurance }} réponse(s) reçue(s)</p>
+        <p>{{ nbOccurance }} questionnaire(s) pris en compte</p>
         {% if (question.typeOfQuestion == constant('App\\Entity\\Question::QUESTION_REPONSE_OUVERTE_SANS_FILTRE') or question.typeOfQuestion == constant('App\\Entity\\Question::QUESTION_REPONSE_OUVERTE_AVEC_FILTRE') or question.typeOfQuestion == constant('App\\Entity\\Question::SOUS_QUESTION_REPONSE_OUVERTE')) %}
             {% if question.categories|length == 0  %}
                 <p><a href="{{ path("admin_add_categorisation", { 'question' : question.id }) }}"><span class="label label-danger">Il n'y a pas de catégorisation</span></a></p>
@@ -17,17 +17,21 @@
                     <tr>
                         <th>Catégorie</th>
                         <th>Nombre d'occurences</th>
-                        <th>Pourcentage</th>
                     </tr>
                     </thead>
                     <tbody>
+                    {% set nbOccuranceCategorie  = 0 %}
                     {% for categorie in question.categories %}
                         <tr>
                             <td>{{ categorie.categorie }}</td>
                             <td>{{ categorie.reponsesFournies|length }}</a></td>
-                            <td></td>
+                            {% set nbOccuranceCategorie = nbOccuranceCategorie + categorie.reponsesFournies|length %}
                         </tr>
                     {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td>Total : {{ nbOccuranceCategorie }}</td>
+                    </tr>
                     </tbody>
                 </table>
                 <p><a href="{{ path("admin_add_categorisation", { 'question' : question.id }) }}"><span class="label label-success"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Ajouter une catégorie</span></a></p>
@@ -40,6 +44,7 @@
                     <th>Réponses</th>
                     <th>Nombre d'occurences</th>
                     <th>Pourcentage</th>
+                    {% set nbOccuranceCategorie  = 0 %}
                 </tr>
                 </thead>
                 <tbody>
@@ -49,8 +54,14 @@
                         <td>{{ reponse.texte }}</td>
                         <td>{{ reponse.reponsesFournies|length }}</a></td>
                         <td>{{ ((reponse.reponsesFournies|length*100)/(nbOccurance))|round(2) }} %</td>
+                        {% set nbOccuranceCategorie = nbOccuranceCategorie + reponse.reponsesFournies|length %}
                     </tr>
                 {% endfor %}
+                <tr>
+                    <td></td>
+                    <td>Total : {{ nbOccuranceCategorie }}</td>
+                    <td></td>
+                </tr>
                 </tbody>
             </table>
         {% endif %}

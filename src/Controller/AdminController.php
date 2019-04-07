@@ -33,7 +33,6 @@ use App\Form\SousQuestionOuverteType;
 use App\Form\ThematiqueType;
 use App\Service\FormQuestionnaireFactory;
 use Doctrine\Common\Collections\ArrayCollection;
-use function Sodium\add;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -114,13 +113,11 @@ class AdminController extends Controller
      * @Route("/categorisation/delete/{categorisation}", name="admin_delete_categorisation", requirements={"categorisation"="\d+"})
      */
     public function removeCategorie(Categorisation $categorisation){
-        if($categorisation->getReponsesFournies()->count() > 0){
-            $this->addFlash("error", "Impossible de supprimer cette catégorie car il y a des réponses qui y sont affectuées");
-        }else{
-            $this->getDoctrine()->getManager()->remove($categorisation);
-            $this->getDoctrine()->getManager()->flush();
-            $this->addFlash("success","La catégorie a bien été supprimée");
-        }
+
+        $this->getDoctrine()->getManager()->remove($categorisation);
+        $this->getDoctrine()->getManager()->flush();
+        $this->addFlash("success","La catégorie a bien été supprimée");
+
 
         return $this->redirectToRoute("admin_add_categorisation",array(
             'question' => $categorisation->getQuestion()->getId()
@@ -170,7 +167,7 @@ class AdminController extends Controller
         /** @var null|array $question */
         $reponse = $this->getDoctrine()->getRepository(ReponsesFourniesIndividuellesOuverte::class)->getReponseWithoutCategories();
 
-        if($reponse !== null) {
+        if(array_key_exists(0,$reponse)) {
             $reponse = $reponse[0];
             $form = $this->createForm(CategorisationType::class,$reponse);
             $form->add("Classifier !",SubmitType::class);
@@ -187,12 +184,34 @@ class AdminController extends Controller
                 return $this->redirectToRoute("admin_categorise");
             }
 
+            return $this->render('admin\categorisation.html.twig',array(
+                'reponse' => $reponse,
+                'form' => $form->createView()
+            ));
+
         }
 
-        return $this->render('admin\categorisation.html.twig',array(
-            'reponse' => $reponse,
-            'form' => $form->createView()
-        ));
+        $this->addFlash("danger","Toutes les questions sont déjà classifiées");
+        return $this->redirectToRoute("admin_home");
+    }
+
+    /**
+     * @param ReponsesFournies $questionnaire
+     * @param null $routeName
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @Route("/changeJoindreALAnalyse/{questionnaire}/retour/{routeName}", name="admin_change_joindre_a_l_analyse_redirect", requirements={"questionnaire"="\d+"})
+     * @Route("/changeJoindreALAnalyse/{questionnaire}", name="admin_change_joindre_a_l_analyse", requirements={"questionnaire"="\d+"})
+     */
+    public function changeQuestionnaireAnalyse(ReponsesFournies $questionnaire,$routeName=null){
+        $questionnaire->setJoindreALAnalyse(!$questionnaire->getJoindreALAnalyse());
+        $this->getDoctrine()->getManager()->persist($questionnaire);
+        $this->getDoctrine()->getManager()->flush();
+
+        if(null!==$routeName){
+            return $this->redirectToRoute($routeName);
+        }
+
+        return $this->redirectToRoute("admin_home");
     }
 
     /**
