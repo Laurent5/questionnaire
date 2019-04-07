@@ -19,6 +19,18 @@ class ReponsesFourniesRepository extends ServiceEntityRepository
         parent::__construct($registry, ReponsesFournies::class);
     }
 
+    public function getAllActives(){
+        return $this
+            ->createQueryBuilder('que')
+            ->select(array("que","rfi"))
+            ->where("que.joindreALAnalyse = :true")
+            ->leftJoin("que.reponses","rfi")
+            ->setParameter("true",true)
+            ->getQuery()
+            ->execute()
+            ;
+    }
+
 //    /**
 //     * @return ReponsesFournies[] Returns an array of ReponsesFournies objects
 //     */
