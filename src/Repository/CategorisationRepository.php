@@ -19,6 +19,21 @@ class CategorisationRepository extends ServiceEntityRepository
         parent::__construct($registry, Categorisation::class);
     }
 
+    public function getAllValidResponsesFrom(Categorisation $categorisation){
+        return $this
+            ->createQueryBuilder('c')
+            ->select(array('c','rfi','que'))
+            ->leftJoin('c.reponsesFournies','rfi')
+            ->leftJoin('rfi.questionnaire','que')
+            ->where('que.joindreALAnalyse = :true')
+            ->andWhere('c.id = :id')
+            ->setParameter('id',$categorisation->getId())
+            ->setParameter('true',true)
+            ->getQuery()
+            ->getSingleResult()
+            ;
+    }
+
 //    /**
 //     * @return Categorisation[] Returns an array of Categorisation objects
 //     */

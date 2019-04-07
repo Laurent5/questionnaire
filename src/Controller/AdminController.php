@@ -169,30 +169,56 @@ class AdminController extends Controller
 
         if(array_key_exists(0,$reponse)) {
             $reponse = $reponse[0];
-            $form = $this->createForm(CategorisationType::class,$reponse);
-            $form->add("Classifier !",SubmitType::class);
-            $form->handleRequest($request);
-
-            if($form->isSubmitted() && $form->isValid()){
-
-                /** @var ReponsesFourniesIndividuellesOuverte $data */
-                $data = $form->getData();
-
-                $this->getDoctrine()->getManager()->persist($data);
-                $this->getDoctrine()->getManager()->flush();
-
-                return $this->redirectToRoute("admin_categorise");
-            }
-
-            return $this->render('admin\categorisation.html.twig',array(
-                'reponse' => $reponse,
-                'form' => $form->createView()
-            ));
-
+            return $this->categoriseManagement($reponse,$request,"admin_categorise");
         }
 
         $this->addFlash("danger","Toutes les questions sont déjà classifiées");
         return $this->redirectToRoute("admin_home");
+    }
+
+    /**
+     * @param Categorisation $categorisation
+     * @return Response
+     * @Route("/categorisation/categorie/{categorisation}", name="admin_categorie", requirements={"categorisation"="\d+"})
+     */
+    public function getAllReponseFromCategorie(Categorisation $categorisation){
+        $reponses = $this->getDoctrine()->getRepository(Categorisation::class)->getAllValidResponsesFrom($categorisation);
+
+        return $this->render('admin\categorie.html.twig',array(
+            'categorie' => $reponses
+        ));
+    }
+
+    /**
+     * @Route("/update/categories/reponse/{reponse}/route/{routeName}", name="admin_update_categories_redirect_to_route", requirements={"reponse"="\d+"})
+     * @Route("/update/categories/reponse/{reponse}", name="admin_update_categories", requirements={"reponse"="\d+"})
+     * @param ReponsesFourniesIndividuellesOuverte $reponse
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
+    public function categoriseManagement(ReponsesFourniesIndividuellesOuverte $reponse, Request $request, $routeName = "admin_home"){
+
+        $form = $this->createForm(CategorisationType::class,$reponse);
+        $form->add("Classifier !",SubmitType::class);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+
+            /** @var ReponsesFourniesIndividuellesOuverte $data */
+            $data = $form->getData();
+
+            $this->getDoctrine()->getManager()->persist($data);
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute($routeName);
+
+        }
+
+        return $this->render('admin\categorisation.html.twig',array(
+            'reponse' => $reponse,
+            'form' => $form->createView()
+        ));
+
     }
 
     /**

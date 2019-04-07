@@ -17,6 +17,7 @@
                     <tr>
                         <th>Catégorie</th>
                         <th>Nombre d'occurences</th>
+                        <th>Détail</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -25,6 +26,7 @@
                         <tr>
                             <td>{{ categorie.categorie }}</td>
                             <td>{{ categorie.reponsesFournies|length }}</a></td>
+                            <td><a href="{{ path("admin_categorie", { 'categorisation' : categorie.id }) }}">Voir le détail ...</a></td>
                             {% set nbOccuranceCategorie = nbOccuranceCategorie + categorie.reponsesFournies|length %}
                         </tr>
                     {% endfor %}
